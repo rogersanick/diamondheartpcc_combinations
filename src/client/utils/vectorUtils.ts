@@ -47,7 +47,7 @@ const adjustVectorForScale = (vector: Vector3, scale: number) => {
     const { x, y, z } = vectorToReturn
     vector.x = x * scale
     vector.y = -(y * scale - scale)
-    vector.z = z! * scale
+    vector.z = -z! * scale
     return vectorToReturn
 }
 
