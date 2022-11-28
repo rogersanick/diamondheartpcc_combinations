@@ -1,4 +1,4 @@
-import { Mesh, MeshPhongMaterial, PlaneGeometry, Scene } from "three"
+import { Mesh, MeshPhongMaterial, PlaneGeometry } from "three"
 
 /**
   * Floor
