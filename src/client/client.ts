@@ -14,6 +14,7 @@ import BobletBot from "./bobletBotModel"
 import gsap from "gsap"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
+import { adjustFrameForScale, adjustVectorForScale } from "./utils/vectorUtils"
 
 // TODO: Implement expontial moving average
 // TODO: Fix glove rotation bug
@@ -43,7 +44,7 @@ addLoadingIndicator();
     */
     const gui = new GUI()
     const debugObject = {
-        fromVideo: true,
+        fromVideo: false,
         playbackSpeed: 1,
         motionDataScale: 5,
         movement_data_movie: "fight_stance",
@@ -59,7 +60,6 @@ addLoadingIndicator();
         headScale: 0.3
     }
     // TODO: Add this back when JSON data is better managed
-    // gui.add(debugObject, "fromVideo")
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
     const sourceDataFolder = gui.addFolder("source")
     sourceDataFolder.open()
@@ -82,6 +82,9 @@ addLoadingIndicator();
         "combo_8",
         "combo_9",
         "combo_10",
+    ]
+    const movementJSONSourceNames = movementVideoSourceNames.flatMap((name) => [name])
+    movementVideoSourceNames.push(        
         "combo_1_v2",
         "combo_1_v2", 
         "combo_2_v2", 
@@ -93,22 +96,20 @@ addLoadingIndicator();
         "combo_8_v2",
         "combo_9_v2",
         "combo_10_v2"
-    ]
-    const movementJSONSourceNames = movementVideoSourceNames.flatMap((name) => [name])
-    
+    )
+
     /** Retrieve all of the movement data */
     const retrieveExtractedJSONData = async () => {
-
         const processedMovementDataSets = await Promise.all(movementJSONSourceNames.map(async (ele) => {
-            // const json = await fetch(`/motion_data/${ele}.json`).then(res => res.json())
+            const json = await fetch(`/motion_data/${ele}.json`).then(res => res.json())
             return {
                 name: ele,
-                json: {} as any
+                json
             }
         }))
         
         /** Process pose JSON into Vectors */
-        const processedMovementDataSetMap = processedMovementDataSets.reduce((acc, ele) => {
+        return processedMovementDataSets.reduce((acc, ele) => {
             acc[ele.name] = ele.json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
             return acc
         }, {} as {[key: string]: any})
@@ -116,14 +117,14 @@ addLoadingIndicator();
 
 
     // TODO: Add this back when JSON performance is improved
-    // const processedMovementDataSetMap = await retrieveExtractedJSONData()
-    // sourceDataFolder.add(
-    //     debugObject, 
-    //     "movement_data_json", 
-    //     movementJSONSourceNames
-    // ).onChange(() => {
-    //     frame = 0
-    // })
+    const processedMovementDataSetMap = await retrieveExtractedJSONData()
+    sourceDataFolder.add(
+        debugObject, 
+        "movement_data_json", 
+        movementJSONSourceNames
+    ).onChange(() => {
+        frame = 0
+    })
 
     /** Setup renderer and scene */
     const canvas = document.querySelector("canvas.webgl")!
@@ -161,11 +162,11 @@ addLoadingIndicator();
     const changeVideo = (fileName: string) => {
         setupVideo(`/videos/${fileName}.MOV`).then(videoElement => video = videoElement)
     }
-    sourceDataFolder.add(
-        debugObject, 
-        "movement_data_movie", 
-        movementVideoSourceNames
-    ).onChange(changeVideo)
+    // sourceDataFolder.add(
+    //     debugObject, 
+    //     "movement_data_movie", 
+    //     movementVideoSourceNames
+    // ).onChange(changeVideo)
 
     gui.add(debugObject, "pause").onChange((value) => {
         if (value) {
@@ -234,7 +235,7 @@ addLoadingIndicator();
     */
 
     const clock = new THREE.Clock()
-    // let frame = 0
+    let frame = 0
     const tick = () =>
     {
         stats.begin()
@@ -242,24 +243,25 @@ addLoadingIndicator();
         /** Boblet bot from video stream */
         if (debugObject.fromVideo && video && poseDetector && !debugObject.pause) {
             processVideoFrameToVectors(poseDetector, video, debugObject).then(vectorsAtFrame => {
-                bobletBot.positionSelfFromMotionData(vectorsAtFrame!, debugObject.motionDataScale)
-                gloves.positionLeftHand(vectorsAtFrame!, debugObject.motionDataScale)
-                gloves.positionRightHand(vectorsAtFrame!, debugObject.motionDataScale)
+                const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame!, debugObject.motionDataScale)
+                bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame!)
+                gloves.positionLeftHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
+                gloves.positionRightHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
             })
         }
 
         /** Boblet bot from JSON */
-        // if (!debugObject.fromVideo && !debugObject.pause) {
-        //     const vectorsAtFrame = processedMovementDataSetMap[debugObject.movement_data_json][frame][0]
-        //     bobletBot.positionSelfFromMotionData(vectorsAtFrame, debugObject.motionDataScale)
-        //     gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
-        //     gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
-        //     if (frame < processedMovementDataSetMap[debugObject.movement_data_json].length - 1) {
-        //         frame += 1
-        //     } else {
-        //         frame = 0
-        //     }
-        // }
+        if (!debugObject.fromVideo && !debugObject.pause) {
+            const vectorsAtFrame = adjustFrameForScale(processedMovementDataSetMap[debugObject.movement_data_json][frame][0], debugObject.motionDataScale)
+            bobletBot.positionSelfFromMotionData(vectorsAtFrame)
+            gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
+            gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
+            if (frame < processedMovementDataSetMap[debugObject.movement_data_json].length - 1) {
+                frame += 1
+            } else {
+                frame = 0
+            }
+        }
 
         // Move the light
         const elapsedTime = clock.getElapsedTime()

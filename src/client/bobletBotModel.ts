@@ -95,9 +95,7 @@ class BobletBot {
         scene.add(this.rightHeel, this.leftHeel, this.leftShin, this.rightShin, this.leftThigh, this.rightThigh, this.leftArm, this.rightArm, this.leftForearm, this.rightForearm, this.head, this.upperTorso, this.middleTorso, this.lowerTorso, this.leftFoot, this.rightFoot, this.leftShoulder, this.rightShoulder, this.leftElbow, this.rightElbow, this.leftHip, this.rightHip, this.leftKnee, this.rightKnee)
     }
 
-    positionSelfFromMotionData(points: {[key: string]: Vector3}, scale: number) {
-        
-        Object.values(points).forEach(point => adjustVectorForScale(point, scale))
+    positionSelfFromMotionData(points: {[key: string]: Vector3}) {
 
         // Set the position of all limbs
         placeLimb(points["left_knee"], points["left_ankle"], this.leftShin)

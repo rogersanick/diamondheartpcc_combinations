@@ -41,14 +41,23 @@ const placeLimb = (vector1: Vector3, vector2: Vector3, object: Object3D) => {
     setPositionBetweenVectors(vector1, vector2, object)
 }
 
-// Adjust for motion data scale
+// Adjust vector for motion data scale
 const adjustVectorForScale = (vector: Vector3, scale: number) => {
-    const vectorToReturn = vector.clone()
+    const vectorToReturn = new Vector3(vector.x, vector.y, vector.z)
     const { x, y, z } = vectorToReturn
-    vector.x = x * scale
-    vector.y = -(y * scale - scale)
-    vector.z = -z! * scale
+    vectorToReturn.x = x * scale
+    vectorToReturn.y = -(y * scale - scale)
+    vectorToReturn.z = -z! * scale
     return vectorToReturn
 }
 
-export { adjustVectorForScale, placeJoint, setPositionFromVector, getRotationFromVectors, setRotationFromVectors, setRotationFromVector, setPositionBetweenVectors, placeLimb, getPositionBetweenVectors }
+// Adjust frame for scale
+const adjustFrameForScale = (frame: { [key: string]: Vector3 }, scale: number) => {
+    const frameToReturn = {} as { [key: string]: Vector3 }
+    Object.keys(frame).forEach(key => {
+        frameToReturn[key] = adjustVectorForScale(frame[key], scale)
+    })
+    return frameToReturn
+}
+
+export { adjustFrameForScale, adjustVectorForScale, placeJoint, setPositionFromVector, getRotationFromVectors, setRotationFromVectors, setRotationFromVector, setPositionBetweenVectors, placeLimb, getPositionBetweenVectors }

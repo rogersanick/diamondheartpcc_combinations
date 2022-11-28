@@ -1,6 +1,7 @@
 import { Vector3 } from "three"
 import * as poseDetection from "@tensorflow-models/pose-detection"
 import { createBodyPoseDetector } from "../movement"
+import { adjustVectorForScale } from "./vectorUtils"
 
 /** Process JSON frame data to Vectors */
 const processJSONFrameToVectors = (data: any[], debugObject: any) => {
