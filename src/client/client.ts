@@ -11,10 +11,9 @@ import { addLights } from "./lights"
 import { generatePlane} from "./floor"
 import Gloves from "./gloves"
 import BobletBot from "./bobletBotModel"
-import gsap from "gsap"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
-import { adjustFrameForScale, adjustVectorForScale } from "./utils/vectorUtils"
+import { adjustFrameForScale } from "./utils/vectorUtils"
 
 // TODO: Implement expontial moving average
 // TODO: Fix glove rotation bug
@@ -24,8 +23,8 @@ import { adjustFrameForScale, adjustVectorForScale } from "./utils/vectorUtils"
  *  TOTHINK/DO: Model movement is smoother from video input than JSON.
  * 
  *  Video input / pose estimation means that poses are roughly syncronous with the current frame of the video.
- *  JSON input conversely has no such relationship as the predicted keypoint vectors are done at an unpredicted / measured rate
- *  which is unsyncronized with the render of the scene.
+ *  JSON input conversely has no such relationship as the predicted keypoint vectors are done at an unpredicted
+ *  / measured rate which is unsyncronized with the render of the scene.
  * 
  *  TODO:
  *  - Implement a way to syncronize the JSON pose data with the render of the scene
@@ -252,7 +251,8 @@ addLoadingIndicator();
 
             /** Boblet bot from JSON */
             if (!debugObject.fromVideo) {
-                const vectorsAtFrame = adjustFrameForScale(processedMovementDataSetMap[debugObject.movement_data_json][frame][0], debugObject.motionDataScale)
+                const vectorsAtFrame = adjustFrameForScale(
+                    processedMovementDataSetMap[debugObject.movement_data_json][frame][0], debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(vectorsAtFrame)
                 gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
                 gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)

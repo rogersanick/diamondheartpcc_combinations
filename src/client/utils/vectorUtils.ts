@@ -1,5 +1,8 @@
 import { Quaternion, ArrowHelper, Euler, Object3D, Vector3 } from "three"
 
+const lerpValue = 0.5
+const slerpValue = 0.7
+
 // Get rotation from vectors 
 const getRotationFromVectors = (vector1: Vector3, vector2: Vector3) => {
     return vector1.clone().sub(vector2).normalize()
@@ -17,7 +20,7 @@ const setRotationFromVector = (vector: Vector3, object: Object3D) => {
     const { x, y, z } = arrowHelper.rotation
     const euler = new Euler(x, y, z)
     const quaternion = new Quaternion().setFromEuler(euler)
-    object.quaternion.slerp(quaternion, 0.5)
+    object.quaternion.slerp(quaternion, slerpValue)
 }
 
 const getPositionBetweenVectors = (vector1: Vector3, vector2: Vector3) => {
@@ -31,13 +34,15 @@ const setPositionFromVector = (vector: Vector3, object: Object3D) => {
 // Set position between two vectors
 const setPositionBetweenVectors = (vector1: Vector3, vector2: Vector3, object: Object3D) => {
     const btwVector = getPositionBetweenVectors(vector1, vector2)
-    object.position.lerp(btwVector, 0.5)
+    object.position.lerp(btwVector, lerpValue)
 }
 
+// Place an object from a single vector
 const placeJoint = (vector: Vector3, object: Object3D) => {
-    object.position.lerp(vector, 0.5)
+    object.position.lerp(vector, lerpValue)
 }
 
+// Place a limb and set rotation from two vectors
 const placeLimb = (vector1: Vector3, vector2: Vector3, object: Object3D) => {
     setRotationFromVectors(vector1, vector2, object)
     setPositionBetweenVectors(vector1, vector2, object)
@@ -62,4 +67,8 @@ const adjustFrameForScale = (frame: { [key: string]: Vector3 }, scale: number) =
     return frameToReturn
 }
 
-export { adjustFrameForScale, adjustVectorForScale, placeJoint, setPositionFromVector, getRotationFromVectors, setRotationFromVectors, setRotationFromVector, setPositionBetweenVectors, placeLimb, getPositionBetweenVectors }
+export { 
+    adjustFrameForScale, adjustVectorForScale, placeJoint, setPositionFromVector, 
+    getRotationFromVectors, setRotationFromVectors, setRotationFromVector, 
+    setPositionBetweenVectors, placeLimb, getPositionBetweenVectors 
+}

@@ -1,5 +1,6 @@
 import { CapsuleGeometry, Mesh, MeshToonMaterial, Scene, SphereGeometry, Vector3 } from "three"
-import { adjustVectorForScale, getPositionBetweenVectors, placeJoint, placeLimb, setPositionBetweenVectors, setPositionFromVector, setRotationFromVectors } from "./utils/vectorUtils"
+import { getPositionBetweenVectors, placeJoint, placeLimb, 
+    setPositionBetweenVectors, setPositionFromVector, setRotationFromVectors } from "./utils/vectorUtils"
 
 class BobletBot {
   
@@ -86,13 +87,22 @@ class BobletBot {
     })
 
     generateLimb = (length: number, blue = false, width?: number) => {
-        const limb = new Mesh(new CapsuleGeometry(width ? width: 0.1, this.debugObject.motionDataScale * length, 16, 16), blue ? this.bodyBlueMaterial : this.bodyWhiteMaterial)
+        const limb = new Mesh(
+            new CapsuleGeometry(width ? width: 0.1, this.debugObject.motionDataScale * length, 16, 16),
+            blue ? this.bodyBlueMaterial : this.bodyWhiteMaterial)
         limb.castShadow = true
         return limb
     }
 
     addSelfToScene = (scene: Scene) => {
-        scene.add(this.rightHeel, this.leftHeel, this.leftShin, this.rightShin, this.leftThigh, this.rightThigh, this.leftArm, this.rightArm, this.leftForearm, this.rightForearm, this.head, this.upperTorso, this.middleTorso, this.lowerTorso, this.leftFoot, this.rightFoot, this.leftShoulder, this.rightShoulder, this.leftElbow, this.rightElbow, this.leftHip, this.rightHip, this.leftKnee, this.rightKnee)
+        scene.add(
+            this.rightHeel, this.leftHeel, this.leftShin, this.rightShin, 
+            this.leftThigh, this.rightThigh, this.leftArm, this.rightArm, 
+            this.leftForearm, this.rightForearm, this.head, this.upperTorso, 
+            this.middleTorso, this.lowerTorso, this.leftFoot, this.rightFoot, 
+            this.leftShoulder, this.rightShoulder, this.leftElbow, this.rightElbow, 
+            this.leftHip, this.rightHip, this.leftKnee, this.rightKnee
+        )
     }
 
     positionSelfFromMotionData(points: {[key: string]: Vector3}) {

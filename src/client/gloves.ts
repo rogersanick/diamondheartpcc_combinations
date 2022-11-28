@@ -1,7 +1,7 @@
 import { GUI } from "dat.gui"
 import { Group, Mesh, Object3D, Scene, Vector3 } from "three"
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-import { setRotationFromVectors } from "./utils/vectorUtils"
+import { setPositionFromVector, setRotationFromVectors } from "./utils/vectorUtils"
 
 export default class Gloves {
     leftGroup: Group = new Group()
@@ -46,7 +46,7 @@ export default class Gloves {
         const left_index = vectors["left_index"]
 
         // Set glove position
-        this.leftGroup?.position.set(left_wrist.x, left_wrist.y, left_wrist.z)
+        setPositionFromVector(left_wrist, this.leftGroup)
 
         // Set rotation from wrist-elbow vector
         setRotationFromVectors(left_wrist, left_elbow, this.leftGroup)
@@ -66,7 +66,7 @@ export default class Gloves {
         const right_index = vectors["right_index"]
 
         // Set glove position
-        this.rightGroup?.position.set(right_wrist.x, right_wrist.y, right_wrist.z)
+        setPositionFromVector(right_wrist, this.rightGroup)
 
         // Set rotation from wrist-elbow vector
         setRotationFromVectors(right_wrist, right_elbow, this.rightGroup)
