@@ -50,13 +50,6 @@ addLoadingIndicator();
         movement_data_json: "fight_stance",
         gloveScale: 0.0009,
         pause: false,
-        cameraX: -10,
-        cameraY: 13,
-        cameraZ: 18,
-        lightX: 0,
-        lightY: 0,
-        lightZ: 0,
-        headScale: 0.3
     }
     // TODO: Add this back when JSON data is better managed
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
@@ -211,7 +204,7 @@ addLoadingIndicator();
      */
     // Base camera
     const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100)
-    camera.position.set(debugObject.cameraX, debugObject.cameraY, debugObject.cameraZ)
+    camera.position.set(-10, 13, 18)
     scene.add(camera)
  
     // Controls
@@ -219,11 +212,8 @@ addLoadingIndicator();
     controls.enableDamping = true
 
     const lookAtDebug = () => {
-        controls.object.position.set(debugObject.cameraX, debugObject.cameraY, debugObject.cameraZ)
+        controls.object.position.set(-10, 13, 18)
     }
-    gui.add(debugObject, "cameraX", -30, 30, 0.01).onChange(lookAtDebug)
-    gui.add(debugObject, "cameraY", -30, 30, 0.01).onChange(lookAtDebug)
-    gui.add(debugObject, "cameraZ", -30, 30, 0.01).onChange(lookAtDebug)
 
     /** Boblet bot creation */
     const bobletBot = new BobletBot(debugObject)
@@ -243,10 +233,12 @@ addLoadingIndicator();
             /** Boblet bot from video stream */
             if (debugObject.fromVideo && video && poseDetector) {
                 const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video, debugObject)
-                const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame!, debugObject.motionDataScale)
-                bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame!)
-                gloves.positionLeftHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
-                gloves.positionRightHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
+                if (vectorsAtFrame) {
+                    const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame!, debugObject.motionDataScale)
+                    bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame!)
+                    gloves.positionLeftHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
+                    gloves.positionRightHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
+                }
             }
 
             /** Boblet bot from JSON */

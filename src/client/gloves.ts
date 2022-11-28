@@ -72,8 +72,8 @@ export default class Gloves {
         setRotationFromVectors(right_wrist, right_elbow, this.rightGroup)
 
         // Rotate wrist to elbow
-        const knucklesVector = right_index.sub(right_pinky)
-        const knucklesAngle = knucklesVector.angleTo(new Vector3(0, 1, 0))
+        const knucklesVector = right_pinky.sub(right_index)
+        const knucklesAngle = knucklesVector.angleTo(new Vector3(0, -1, 0))
         this.right?.rotation.set(0, -knucklesAngle, 0)
     }
 

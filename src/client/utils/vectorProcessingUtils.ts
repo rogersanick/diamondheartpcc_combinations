@@ -21,13 +21,14 @@ const processJSONFrameToVectors = (data: any[], debugObject: any) => {
 }
 
 /** Process video frame to Vectors */
-const processVideoFrameToVectors = (poseDetector: poseDetection.PoseDetector, video: HTMLVideoElement, debugObject: any) => {
+const processVideoFrameToVectors = (poseDetector: poseDetection.PoseDetector, 
+    video: HTMLVideoElement, debugObject: any) => {
     return poseDetector?.estimatePoses(
         video, {
             flipHorizontal: true,
         }).then(results => {
         const pose = results[0]
-        if (!pose.keypoints3D) { return }
+        if (!pose || !pose.keypoints3D) { return }
         const points: {[key: string]: Vector3} = pose.keypoints3D.reduce((acc, point) => {
 
             // Build the map
