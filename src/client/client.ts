@@ -81,20 +81,42 @@ addLoadingIndicator();
         "combo_7",
         "combo_8",
         "combo_9",
-        "combo_10"
+        "combo_10",
+        "combo_1_v2",
+        "combo_1_v2", 
+        "combo_2_v2", 
+        "combo_3_v2",
+        "combo_4_v2",
+        "combo_5_v2",
+        "combo_6_v2",
+        "combo_7_v2",
+        "combo_8_v2",
+        "combo_9_v2",
+        "combo_10_v2"
     ]
     const movementJSONSourceNames = movementVideoSourceNames.flatMap((name) => [name])
     
     /** Retrieve all of the movement data */
-    const processedMovementDataSets = await Promise.all(movementJSONSourceNames.map(async (ele) => {
-        const json = await fetch(`/motion_data/${ele}.json`).then(res => res.json())
-        return {
-            name: ele,
-            json
-        }
-    }))
+    const retrieveExtractedJSONData = async () => {
+
+        const processedMovementDataSets = await Promise.all(movementJSONSourceNames.map(async (ele) => {
+            // const json = await fetch(`/motion_data/${ele}.json`).then(res => res.json())
+            return {
+                name: ele,
+                json: {} as any
+            }
+        }))
+        
+        /** Process pose JSON into Vectors */
+        const processedMovementDataSetMap = processedMovementDataSets.reduce((acc, ele) => {
+            acc[ele.name] = ele.json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
+            return acc
+        }, {} as {[key: string]: any})
+    }
+
 
     // TODO: Add this back when JSON performance is improved
+    // const processedMovementDataSetMap = await retrieveExtractedJSONData()
     // sourceDataFolder.add(
     //     debugObject, 
     //     "movement_data_json", 
@@ -102,12 +124,6 @@ addLoadingIndicator();
     // ).onChange(() => {
     //     frame = 0
     // })
-
-    /** Process pose JSON into Vectors */
-    const processedMovementDataSetMap = processedMovementDataSets.reduce((acc, ele) => {
-        acc[ele.name] = ele.json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
-        return acc
-    }, {} as {[key: string]: any})
 
     /** Setup renderer and scene */
     const canvas = document.querySelector("canvas.webgl")!
@@ -218,7 +234,7 @@ addLoadingIndicator();
     */
 
     const clock = new THREE.Clock()
-    let frame = 0
+    // let frame = 0
     const tick = () =>
     {
         stats.begin()
@@ -233,17 +249,17 @@ addLoadingIndicator();
         }
 
         /** Boblet bot from JSON */
-        if (!debugObject.fromVideo && !debugObject.pause) {
-            const vectorsAtFrame = processedMovementDataSetMap[debugObject.movement_data_json][frame][0]
-            bobletBot.positionSelfFromMotionData(vectorsAtFrame, debugObject.motionDataScale)
-            gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
-            gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
-            if (frame < processedMovementDataSetMap[debugObject.movement_data_json].length - 1) {
-                frame += 1
-            } else {
-                frame = 0
-            }
-        }
+        // if (!debugObject.fromVideo && !debugObject.pause) {
+        //     const vectorsAtFrame = processedMovementDataSetMap[debugObject.movement_data_json][frame][0]
+        //     bobletBot.positionSelfFromMotionData(vectorsAtFrame, debugObject.motionDataScale)
+        //     gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
+        //     gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
+        //     if (frame < processedMovementDataSetMap[debugObject.movement_data_json].length - 1) {
+        //         frame += 1
+        //     } else {
+        //         frame = 0
+        //     }
+        // }
 
         // Move the light
         const elapsedTime = clock.getElapsedTime()
