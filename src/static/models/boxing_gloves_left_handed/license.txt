@@ -1,0 +1,11 @@
+Model Information:
+* title:	Boxing Gloves - Left Handed
+* source:	https://sketchfab.com/3d-models/boxing-gloves-left-handed-076293541203455da59a38eea5b6a44b
+* author:	Gohar.Munir (https://sketchfab.com/Gohar.Munir)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Boxing Gloves - Left Handed" (https://sketchfab.com/3d-models/boxing-gloves-left-handed-076293541203455da59a38eea5b6a44b) by Gohar.Munir (https://sketchfab.com/Gohar.Munir) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

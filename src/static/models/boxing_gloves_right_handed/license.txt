@@ -1,0 +1,11 @@
+Model Information:
+* title:	Boxing Gloves - Right Handed
+* source:	https://sketchfab.com/3d-models/boxing-gloves-right-handed-1ae09e8e4959418b9c4274f9515c5d29
+* author:	Gohar.Munir (https://sketchfab.com/Gohar.Munir)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Boxing Gloves - Right Handed" (https://sketchfab.com/3d-models/boxing-gloves-right-handed-1ae09e8e4959418b9c4274f9515c5d29) by Gohar.Munir (https://sketchfab.com/Gohar.Munir) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

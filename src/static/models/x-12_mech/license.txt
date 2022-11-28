@@ -1,0 +1,11 @@
+Model Information:
+* title:	X-12 Mech
+* source:	https://sketchfab.com/3d-models/x-12-mech-01c685b2e98a486981aeb60a89149265
+* author:	DroneMaster (https://sketchfab.com/dronemaster)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "X-12 Mech" (https://sketchfab.com/3d-models/x-12-mech-01c685b2e98a486981aeb60a89149265) by DroneMaster (https://sketchfab.com/dronemaster) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,615 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 508,
+      "max": [
+        336.34661865234375,
+        518.5578002929688,
+        388.8077697753906
+      ],
+      "min": [
+        -336.34661865234375,
+        -518.5578002929688,
+        -388.8077697753906
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 6096,
+      "componentType": 5126,
+      "count": 508,
+      "max": [
+        0.9876856207847595,
+        0.9996858835220337,
+        0.9297987222671509
+      ],
+      "min": [
+        -0.9747293591499329,
+        -0.9995960593223572,
+        -0.9508364796638489
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 508,
+      "max": [
+        0.94678795337677,
+        0.8424690961837769
+      ],
+      "min": [
+        0.13386991620063782,
+        0.14442263543605804
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 744,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 12192,
+      "componentType": 5126,
+      "count": 8128,
+      "max": [
+        301.2139892578125,
+        503.37811279296875,
+        350.47698974609375
+      ],
+      "min": [
+        -301.2139892578125,
+        -503.3781433105469,
+        -350.47698974609375
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 109728,
+      "componentType": 5126,
+      "count": 8128,
+      "max": [
+        0.9994538426399231,
+        0.9996898174285889,
+        0.9991018176078796
+      ],
+      "min": [
+        -0.9992350935935974,
+        -0.9999727606773376,
+        -0.9985294938087463
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 4064,
+      "componentType": 5126,
+      "count": 8128,
+      "max": [
+        0.9400376677513123,
+        0.8315081596374512
+      ],
+      "min": [
+        0.14010746777057648,
+        0.14503586292266846
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 2976,
+      "componentType": 5125,
+      "count": 12192,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 207264,
+      "componentType": 5126,
+      "count": 32512,
+      "max": [
+        301.4521484375,
+        503.6184387207031,
+        350.90142822265625
+      ],
+      "min": [
+        -301.4521484375,
+        -503.6183776855469,
+        -350.9014587402344
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 597408,
+      "componentType": 5126,
+      "count": 32512,
+      "max": [
+        0.9999836683273315,
+        0.9999943971633911,
+        0.998936116695404
+      ],
+      "min": [
+        -0.9996078610420227,
+        -0.999985933303833,
+        -0.9999647736549377
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 69088,
+      "componentType": 5126,
+      "count": 32512,
+      "max": [
+        0.9402381181716919,
+        0.8317239284515381
+      ],
+      "min": [
+        0.14010746777057648,
+        0.14503586292266846
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 51744,
+      "componentType": 5125,
+      "count": 48768,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 987552,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        301.4521484375,
+        503.1667175292969,
+        351.0861511230469
+      ],
+      "min": [
+        -300.835693359375,
+        -448.9466247558594,
+        -350.0135498046875
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 1773936,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        0.9999658465385437,
+        0.9999948740005493,
+        0.9999400973320007
+      ],
+      "min": [
+        -0.9998295307159424,
+        -0.9806433916091919,
+        -0.9999513030052185
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 329184,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        0.9402381181716919,
+        0.8317239284515381
+      ],
+      "min": [
+        0.14010746777057648,
+        0.25698721408843994
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 246816,
+      "componentType": 5125,
+      "count": 98298,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 2560320,
+      "componentType": 5126,
+      "count": 64516,
+      "max": [
+        262.0637512207031,
+        503.64727783203125,
+        338.70849609375
+      ],
+      "min": [
+        -301.4521484375,
+        -503.64727783203125,
+        -351.0860595703125
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 3334512,
+      "componentType": 5126,
+      "count": 64516,
+      "max": [
+        0.999487042427063,
+        0.9999991655349731,
+        0.9998469352722168
+      ],
+      "min": [
+        -0.9999207258224487,
+        -1.0,
+        -0.9997814893722534
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 853440,
+      "componentType": 5126,
+      "count": 64516,
+      "max": [
+        0.9342146515846252,
+        0.7809638977050781
+      ],
+      "min": [
+        0.16672629117965698,
+        0.14503586292266846
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 640008,
+      "componentType": 5125,
+      "count": 96774,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "Gohar.Munir (https://sketchfab.com/Gohar.Munir)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/boxing-gloves-left-handed-076293541203455da59a38eea5b6a44b",
+      "title": "Boxing Gloves - Left Handed"
+    },
+    "generator": "Sketchfab-12.78.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 1027104,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1369568,
+      "byteOffset": 1027104,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 4108704,
+      "byteOffset": 2396672,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 6505376,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/Glove_Material_baseColor.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "Glove_Material",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.7885257473118872
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Boxing Glove.001_Glove Material_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Boxing Glove.002_Glove Material_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 5,
+            "POSITION": 4,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Boxing Glove.003_Glove Material_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 9,
+            "POSITION": 8,
+            "TEXCOORD_0": 10
+          },
+          "indices": 11,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Boxing Glove.004_Glove Material_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 13,
+            "POSITION": 12,
+            "TEXCOORD_0": 14
+          },
+          "indices": 15,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Boxing Glove.004_Glove Material_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 17,
+            "POSITION": 16,
+            "TEXCOORD_0": 18
+          },
+          "indices": 19,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Boxing Gloves - Left.fbx"
+    },
+    {
+      "children": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        34.80341339111328,
+        488.5713195800781,
+        1347.744140625,
+        1.0
+      ],
+      "name": "Boxing Glove.001"
+    },
+    {
+      "mesh": 0,
+      "name": "Boxing Glove.001_Glove Material_0"
+    },
+    {
+      "children": [
+        6
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        21.88730239868164,
+        481.9554443359375,
+        445.9854736328125,
+        1.0
+      ],
+      "name": "Boxing Glove.002"
+    },
+    {
+      "mesh": 1,
+      "name": "Boxing Glove.002_Glove Material_0"
+    },
+    {
+      "children": [
+        8
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        21.64912223815918,
+        482.1956787109375,
+        -453.5900573730469,
+        1.0
+      ],
+      "name": "Boxing Glove.003"
+    },
+    {
+      "mesh": 2,
+      "name": "Boxing Glove.003_Glove Material_0"
+    },
+    {
+      "children": [
+        10,
+        11
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        21.64912223815918,
+        482.16680908203125,
+        -1353.6817626953125,
+        1.0
+      ],
+      "name": "Boxing Glove.004"
+    },
+    {
+      "mesh": 3,
+      "name": "Boxing Glove.004_Glove Material_0"
+    },
+    {
+      "mesh": 4,
+      "name": "Boxing Glove.004_Glove Material_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    }
+  ]
+}
