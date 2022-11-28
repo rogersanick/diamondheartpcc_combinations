@@ -43,7 +43,7 @@ addLoadingIndicator();
     */
     const gui = new GUI()
     const debugObject = {
-        fromVideo: true,
+        fromVideo: false,
         playbackSpeed: 1,
         motionDataScale: 5,
         movement_data_movie: "fight_stance",
@@ -53,6 +53,7 @@ addLoadingIndicator();
     }
     // TODO: Add this back when JSON data is better managed
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
+    gui.add(debugObject, "fromVideo")
     const sourceDataFolder = gui.addFolder("source")
     sourceDataFolder.open()
  
@@ -75,7 +76,11 @@ addLoadingIndicator();
         "combo_9",
         "combo_10",
     ]
+
+    // Add interpolated data
     const movementJSONSourceNames = movementVideoSourceNames.flatMap((name) => [name])
+    
+    // Add v2 of combos
     movementVideoSourceNames.push(        
         "combo_1_v2",
         "combo_1_v2", 
@@ -91,30 +96,22 @@ addLoadingIndicator();
     )
 
     /** Retrieve all of the movement data */
-    const retrieveExtractedJSONData = async () => {
-        const processedMovementDataSets = await Promise.all(movementJSONSourceNames.map(async (ele) => {
-            const json = await fetch(`/motion_data/${ele}.json`).then(res => res.json())
-            return {
-                name: ele,
-                json
-            }
-        }))
+    const retrieveExtractedJSONData = async (dataSetName: string) => {
+        const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
+        return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
         
-        /** Process pose JSON into Vectors */
-        return processedMovementDataSets.reduce((acc, ele) => {
-            acc[ele.name] = ele.json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
-            return acc
-        }, {} as {[key: string]: any})
     }
 
+    // Get the initial JSON data
+    let processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data_json)
 
-    // TODO: Add this back when JSON performance is improved
-    const processedMovementDataSetMap = await retrieveExtractedJSONData()
+    // Process and change the data on request
     sourceDataFolder.add(
         debugObject, 
         "movement_data_json", 
         movementJSONSourceNames
-    ).onChange(() => {
+    ).onChange(async () => {
+        processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data_json)
         frame = 0
     })
 
@@ -243,12 +240,13 @@ addLoadingIndicator();
 
             /** Boblet bot from JSON */
             if (!debugObject.fromVideo) {
+                console.log(debugObject.movement_data_json)
                 const vectorsAtFrame = adjustFrameForScale(
-                    processedMovementDataSetMap[debugObject.movement_data_json][frame][0], debugObject.motionDataScale)
+                    processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(vectorsAtFrame)
                 gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
                 gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
-                if (frame < processedMovementDataSetMap[debugObject.movement_data_json].length - 1) {
+                if (frame < processedCurrentJSONDataSet.length - 1) {
                     frame += 1
                 } else {
                     frame = 0
