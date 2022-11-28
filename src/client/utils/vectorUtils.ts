@@ -1,4 +1,4 @@
-import { ArrowHelper, Euler, Object3D, Vector3 } from "three"
+import { Quaternion, ArrowHelper, Euler, Object3D, Vector3 } from "three"
 
 // Get rotation from vectors 
 const getRotationFromVectors = (vector1: Vector3, vector2: Vector3) => {
@@ -15,7 +15,9 @@ const setRotationFromVectors = (vector1: Vector3, vector2: Vector3, object: Obje
 const setRotationFromVector = (vector: Vector3, object: Object3D) => {
     const arrowHelper = new ArrowHelper(vector, new Vector3(0, 0, 0), 1, 0xff0000)
     const { x, y, z } = arrowHelper.rotation
-    object.rotation.set(x, y, z)
+    const euler = new Euler(x, y, z)
+    const quaternion = new Quaternion().setFromEuler(euler)
+    object.quaternion.slerp(quaternion, 0.5)
 }
 
 const getPositionBetweenVectors = (vector1: Vector3, vector2: Vector3) => {
@@ -29,11 +31,11 @@ const setPositionFromVector = (vector: Vector3, object: Object3D) => {
 // Set position between two vectors
 const setPositionBetweenVectors = (vector1: Vector3, vector2: Vector3, object: Object3D) => {
     const btwVector = getPositionBetweenVectors(vector1, vector2)
-    object.position.set(btwVector.x, btwVector.y, btwVector.z)
+    object.position.lerp(btwVector, 0.5)
 }
 
 const placeJoint = (vector: Vector3, object: Object3D) => {
-    object.position.set(vector.x, vector.y, vector.z)
+    object.position.lerp(vector, 0.5)
 }
 
 const placeLimb = (vector1: Vector3, vector2: Vector3, object: Object3D) => {

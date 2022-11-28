@@ -44,7 +44,7 @@ addLoadingIndicator();
     */
     const gui = new GUI()
     const debugObject = {
-        fromVideo: false,
+        fromVideo: true,
         playbackSpeed: 1,
         motionDataScale: 5,
         movement_data_movie: "fight_stance",
@@ -162,11 +162,11 @@ addLoadingIndicator();
     const changeVideo = (fileName: string) => {
         setupVideo(`/videos/${fileName}.MOV`).then(videoElement => video = videoElement)
     }
-    // sourceDataFolder.add(
-    //     debugObject, 
-    //     "movement_data_movie", 
-    //     movementVideoSourceNames
-    // ).onChange(changeVideo)
+    sourceDataFolder.add(
+        debugObject, 
+        "movement_data_movie", 
+        movementVideoSourceNames
+    ).onChange(changeVideo)
 
     gui.add(debugObject, "pause").onChange((value) => {
         if (value) {
@@ -236,39 +236,40 @@ addLoadingIndicator();
 
     const clock = new THREE.Clock()
     let frame = 0
-    const tick = () =>
+    const tick = async () =>
     {
         stats.begin()
 
-        /** Boblet bot from video stream */
-        if (debugObject.fromVideo && video && poseDetector && !debugObject.pause) {
-            processVideoFrameToVectors(poseDetector, video, debugObject).then(vectorsAtFrame => {
+        if (!debugObject.pause) {
+            /** Boblet bot from video stream */
+            if (debugObject.fromVideo && video && poseDetector) {
+                const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video, debugObject)
                 const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame!, debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame!)
                 gloves.positionLeftHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
                 gloves.positionRightHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
-            })
-        }
-
-        /** Boblet bot from JSON */
-        if (!debugObject.fromVideo && !debugObject.pause) {
-            const vectorsAtFrame = adjustFrameForScale(processedMovementDataSetMap[debugObject.movement_data_json][frame][0], debugObject.motionDataScale)
-            bobletBot.positionSelfFromMotionData(vectorsAtFrame)
-            gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
-            gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
-            if (frame < processedMovementDataSetMap[debugObject.movement_data_json].length - 1) {
-                frame += 1
-            } else {
-                frame = 0
             }
-        }
 
-        // Move the light
-        const elapsedTime = clock.getElapsedTime()
-        light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
-        light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
-        light.spotLight.lookAt(new Vector3(0,0,0))
-        light.helper.update()
+            /** Boblet bot from JSON */
+            if (!debugObject.fromVideo) {
+                const vectorsAtFrame = adjustFrameForScale(processedMovementDataSetMap[debugObject.movement_data_json][frame][0], debugObject.motionDataScale)
+                bobletBot.positionSelfFromMotionData(vectorsAtFrame)
+                gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
+                gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
+                if (frame < processedMovementDataSetMap[debugObject.movement_data_json].length - 1) {
+                    frame += 1
+                } else {
+                    frame = 0
+                }
+            }
+
+            // Move the light
+            const elapsedTime = clock.getElapsedTime()
+            light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
+            light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
+            light.spotLight.lookAt(new Vector3(0,0,0))
+            light.helper.update()
+        }
 
         // Update controls
         controls.update()
