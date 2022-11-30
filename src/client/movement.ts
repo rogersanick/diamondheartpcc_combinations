@@ -33,6 +33,10 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     return video
 }
 
+const removeVideo = () => {
+    video.remove()
+}
+
 const createHandPoseDetector = async () => {
     const model = handPoseDetection.SupportedModels.MediaPipeHands
     return await handPoseDetection.createDetector(model, {
@@ -50,4 +54,4 @@ const createBodyPoseDetector = async () => {
     })
 }
 
-export { setupVideo, createHandPoseDetector, createBodyPoseDetector }
+export { setupVideo, removeVideo, createHandPoseDetector, createBodyPoseDetector }

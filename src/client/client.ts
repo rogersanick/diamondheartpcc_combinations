@@ -15,9 +15,16 @@ import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
 
-// TODO: Implement expontial moving average
+// EPIC: BUG FIXES
 // TODO: Fix glove rotation bug
-// TODO: Reset movement data extracted from videos
+
+// EPIC: USABILITY
+// TODO: Enable full switching btw JSON / video by fromVideo
+// TODO: Get rid of chatter
+
+// EPIC: PERFORMANCE / MOBILE
+// TODO: Node script OR UI for extracting reliable PER FRAME pose data from input
+// TODO: Implement expontial moving average
 
 /**
  *  TOTHINK/DO: Model movement is smoother from video input than JSON.
