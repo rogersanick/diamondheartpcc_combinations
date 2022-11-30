@@ -6,7 +6,7 @@ import * as poseDetection from "@tensorflow-models/pose-detection"
 import Stats from "stats.js"
 import { Vector3, WebGLRenderer } from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import { createBodyPoseDetector, setupVideo } from "./movement"
+import { createBodyPoseDetector, removeVideo, setupVideo } from "./movement"
 import { addLights } from "./lights"
 import { generatePlane} from "./floor"
 import Gloves from "./gloves"
@@ -14,6 +14,34 @@ import BobletBot from "./bobletBotModel"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
+import e from "express"
+
+// CONSTANTS
+// TODO: Move these to another file
+/** List out data set names */
+const movementDataSourceNames = [
+    "fight_stance", 
+    "combo_1", 
+    "combo_2", 
+    "combo_3",
+    "combo_4",
+    "combo_5",
+    "combo_6",
+    "combo_7",
+    "combo_8",
+    "combo_9",
+    "combo_10",
+    "combo_1_v2", 
+    "combo_2_v2", 
+    "combo_3_v2",
+    "combo_4_v2",
+    "combo_5_v2",
+    "combo_6_v2",
+    "combo_7_v2",
+    "combo_8_v2",
+    "combo_9_v2",
+    "combo_10_v2"
+]
 
 // EPIC: BUG FIXES
 // TODO: Fix glove rotation bug
@@ -45,81 +73,79 @@ addLoadingIndicator();
 /** Begin 3D Rendering */
 (async () => {
     
-    /**
-    * GUI Setup
-    */
+    /** GUI Setup & Stats setup */
     const gui = new GUI()
     const debugObject = {
         fromVideo: false,
         playbackSpeed: 1,
         motionDataScale: 5,
-        movement_data_movie: "fight_stance",
-        movement_data_json: "fight_stance",
+        movement_data: "fight_stance",
         gloveScale: 0.0009,
         pause: false,
     }
-    // TODO: Add this back when JSON data is better managed
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
-    gui.add(debugObject, "fromVideo")
-    const sourceDataFolder = gui.addFolder("source")
-    sourceDataFolder.open()
- 
+
     /** Set up basic statistics */
     const stats = new Stats()
     stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom)
- 
-    /** List out data set names */
-    const movementVideoSourceNames = [
-        "fight_stance", 
-        "combo_1", 
-        "combo_2", 
-        "combo_3",
-        "combo_4",
-        "combo_5",
-        "combo_6",
-        "combo_7",
-        "combo_8",
-        "combo_9",
-        "combo_10",
-    ]
 
-    // Add interpolated data
-    const movementJSONSourceNames = movementVideoSourceNames.flatMap((name) => [name])
-    
-    // Add v2 of combos
-    movementVideoSourceNames.push(        
-        "combo_1_v2",
-        "combo_1_v2", 
-        "combo_2_v2", 
-        "combo_3_v2",
-        "combo_4_v2",
-        "combo_5_v2",
-        "combo_6_v2",
-        "combo_7_v2",
-        "combo_8_v2",
-        "combo_9_v2",
-        "combo_10_v2"
-    )
+    /** Data Source (either JSON or VIDEO, default to JSON for mobile) */
 
-    /** Retrieve all of the movement data */
+    // JSON Data Configuration
     const retrieveExtractedJSONData = async (dataSetName: string) => {
         const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
         return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
-        
     }
+    let processedCurrentJSONDataSet: any = await retrieveExtractedJSONData(debugObject.movement_data)
 
-    // Get the initial JSON data
-    let processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data_json)
+    // Video Data Configuration
+    let video: HTMLVideoElement | null = null
+    let poseDetector: poseDetection.PoseDetector | null = null
+    gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
+        if (video) {
+            video.playbackRate = debugObject.playbackSpeed
+        }
+    })
+    gui.add(debugObject, "pause").onChange((value) => {
+        if (value) {
+            video?.pause()
+        } else {
+            video?.play()
+        }
+    })
 
     // Process and change the data on request
-    sourceDataFolder.add(
+    gui.add(
         debugObject, 
-        "movement_data_json", 
-        movementJSONSourceNames
+        "movement_data", 
+        movementDataSourceNames
     ).onChange(async () => {
-        processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data_json)
+        processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data)
         frame = 0
+    })
+
+    /** Make data configurable */
+    gui.add(debugObject, "fromVideo").onChange(async ele => {
+        if (ele) {
+            if (!poseDetector) { poseDetector = await createBodyPoseDetector() }
+            video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
+        } else {
+            // Start at the beginning 
+            frame = 0
+            
+            // Retrieve all of the movement data
+            const retrieveExtractedJSONData = async (dataSetName: string) => {
+                const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
+                return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
+            }
+            
+            // Get the initial JSON data
+            processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data)
+            
+            // Remove the initial video source
+            removeVideo()
+        }
     })
 
     /** Setup renderer and scene */
@@ -140,37 +166,6 @@ addLoadingIndicator();
     const gltfLoader = new GLTFLoader()
     const gloves = new Gloves(gltfLoader, gui, debugObject, scene)
     const textureLoader = new THREE.TextureLoader()
-
-    /** Video tracking setup */
-    let video: HTMLVideoElement | null = null
-    let poseDetector: poseDetection.PoseDetector | null = null
-    setupVideo(`/videos/${debugObject.movement_data_movie}.MOV`, debugObject.playbackSpeed).then(async videoElement => {
-        video = videoElement
-        poseDetector = await createBodyPoseDetector()
-    })
-    gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
-        if (video) {
-            video!.playbackRate = debugObject.playbackSpeed
-        }
-    })
-
-    /** Change current video input for movement */
-    const changeVideo = (fileName: string) => {
-        setupVideo(`/videos/${fileName}.MOV`).then(videoElement => video = videoElement)
-    }
-    sourceDataFolder.add(
-        debugObject, 
-        "movement_data_movie", 
-        movementVideoSourceNames
-    ).onChange(changeVideo)
-
-    gui.add(debugObject, "pause").onChange((value) => {
-        if (value) {
-            video?.pause()
-        } else {
-            video?.play()
-        }
-    })
  
     const light = addLights(scene)
     const floor = generatePlane()
@@ -202,31 +197,20 @@ addLoadingIndicator();
         renderer.setSize(sizes.width, sizes.height)
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     })
- 
-    /**
-     * Cameras
-     */
-    // Base camera
+
+    /** Camera & User Camera */
     const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100)
     camera.position.set(-10, 13, 18)
     scene.add(camera)
- 
-    // Controls
+
     const controls = new OrbitControls(camera, canvas as HTMLElement)
     controls.enableDamping = true
-
-    const lookAtDebug = () => {
-        controls.object.position.set(-10, 13, 18)
-    }
 
     /** Boblet bot creation */
     const bobletBot = new BobletBot(debugObject)
     bobletBot.addSelfToScene(scene)
 
-    /**
-    * Animate
-    */
-
+    /** Animate */
     const clock = new THREE.Clock()
     let frame = 0
     const tick = async () =>
@@ -239,16 +223,15 @@ addLoadingIndicator();
             if (debugObject.fromVideo && video && poseDetector) {
                 const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video, debugObject)
                 if (vectorsAtFrame) {
-                    const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame!, debugObject.motionDataScale)
-                    bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame!)
-                    gloves.positionLeftHand(scaledVectorsAtFrame!)
-                    gloves.positionRightHand(scaledVectorsAtFrame!)
+                    const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
+                    bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame)
+                    gloves.positionLeftHand(scaledVectorsAtFrame)
+                    gloves.positionRightHand(scaledVectorsAtFrame)
                 }
             }
 
             /** Boblet bot from JSON */
             if (!debugObject.fromVideo) {
-                console.log(debugObject.movement_data_json)
                 const vectorsAtFrame = adjustFrameForScale(
                     processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(vectorsAtFrame)
