@@ -115,38 +115,40 @@ addLoadingIndicator();
         }
     })
 
-    // Process and change the data on request
-    gui.add(
-        debugObject, 
-        "movement_data", 
-        movementDataSourceNames
-    ).onChange(async () => {
-        processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data)
-        frame = 0
-    })
-
-    /** Make data configurable */
-    gui.add(debugObject, "fromVideo").onChange(async ele => {
+    // Conditionally reset either the JSON or Video data source
+    const resetDataSource = async (ele: boolean) => {
         if (ele) {
             if (!poseDetector) { poseDetector = await createBodyPoseDetector() }
             video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
         } else {
             // Start at the beginning 
             frame = 0
-            
+    
             // Retrieve all of the movement data
             const retrieveExtractedJSONData = async (dataSetName: string) => {
                 const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
                 return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
             }
-            
+                
             // Get the initial JSON data
             processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data)
-            
+                
             // Remove the initial video source
             removeVideo()
         }
+    }
+
+    // Allow user to change data source 
+    gui.add(
+        debugObject, 
+        "movement_data", 
+        movementDataSourceNames
+    ).onChange(async () => {
+        resetDataSource(debugObject.fromVideo)
     })
+
+    // Allow user to switch between video and JSON data source
+    gui.add(debugObject, "fromVideo").onChange(resetDataSource)
 
     /** Setup renderer and scene */
     const canvas = document.querySelector("canvas.webgl")!
