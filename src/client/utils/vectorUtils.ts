@@ -9,16 +9,16 @@ const getRotationFromVectors = (vector1: Vector3, vector2: Vector3) => {
 }
 
 // Set rotation from two vectors
-const setRotationFromVectors = (vector1: Vector3, vector2: Vector3, object: Object3D) => {
+const setRotationFromVectors = (vector1: Vector3, vector2: Vector3, object: Object3D, dampener = 1) => {
     const btwVector = getRotationFromVectors(vector1, vector2)
-    setRotationFromVector(btwVector, object)
+    setRotationFromVector(btwVector, object, dampener)
 }
 
 // Set rotation of object from vector
-const setRotationFromVector = (vector: Vector3, object: Object3D) => {
+const setRotationFromVector = (vector: Vector3, object: Object3D, dampener = 1) => {
     const arrowHelper = new ArrowHelper(vector, new Vector3(0, 0, 0), 1, 0xff0000)
     const { x, y, z } = arrowHelper.rotation
-    const euler = new Euler(x, y, z)
+    const euler = new Euler(x, y * dampener, z)
     const quaternion = new Quaternion().setFromEuler(euler)
     object.quaternion.slerp(quaternion, slerpValue)
 }
@@ -52,7 +52,7 @@ const placeLimb = (vector1: Vector3, vector2: Vector3, object: Object3D) => {
 const adjustVectorForScale = (vector: Vector3, scale: number) => {
     const vectorToReturn = new Vector3(vector.x, vector.y, vector.z)
     const { x, y, z } = vectorToReturn
-    vectorToReturn.x = x * scale
+    vectorToReturn.x = -x * scale
     vectorToReturn.y = -(y * scale - scale)
     vectorToReturn.z = -z! * scale
     return vectorToReturn

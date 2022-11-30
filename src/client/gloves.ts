@@ -37,7 +37,7 @@ export default class Gloves {
 
 
     positionLeftHand(
-        vectors: { [key: string]: Vector3 }, scale: number
+        vectors: { [key: string]: Vector3 }
     ) {
 
         const left_wrist = vectors["left_wrist"]
@@ -49,16 +49,16 @@ export default class Gloves {
         setPositionFromVector(left_wrist, this.leftGroup)
 
         // Set rotation from wrist-elbow vector
-        setRotationFromVectors(left_wrist, left_elbow, this.leftGroup)
+        setRotationFromVectors(left_wrist, left_elbow, this.leftGroup, 0.7)
 
         // Rotate wrist rotation
         const knucklesVector = left_index.sub(left_pinky)
-        const knucklesAngle = knucklesVector.angleTo(new Vector3(0, 1, 0))
-        this.left?.rotation.set(this.left?.rotation.x, knucklesAngle + Math.PI, this.left?.rotation.z)
+        const knucklesAngle = knucklesVector.angleTo(new Vector3(0, -1, 0))
+        this.left?.rotation.set(this.left?.rotation.x, knucklesAngle, this.left?.rotation.z)
     }
 
     positionRightHand(
-        vectors: { [key: string]: Vector3 }, scale: number
+        vectors: { [key: string]: Vector3 }
     ) {
         const right_wrist = vectors["right_wrist"]
         const right_elbow = vectors["right_elbow"]
@@ -69,7 +69,7 @@ export default class Gloves {
         setPositionFromVector(right_wrist, this.rightGroup)
 
         // Set rotation from wrist-elbow vector
-        setRotationFromVectors(right_wrist, right_elbow, this.rightGroup)
+        setRotationFromVectors(right_wrist, right_elbow, this.rightGroup, 0.7)
 
         // Rotate wrist to elbow
         const knucklesVector = right_pinky.sub(right_index)

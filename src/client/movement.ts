@@ -6,15 +6,17 @@ import * as mpPose from "@mediapipe/pose"
 // Creates a video element and gets the users webcam video input
 let video: HTMLVideoElement = document.createElement("video")
 const setupVideo = async (fileName: string, playbackSpeed = 1) => {
-    // if (video) {
-    //     document.getElementById("boblet_bot_input")?.remove()
-    // }
+    if (video) {
+        document.getElementById("boblet_bot_input")?.remove()
+    }
     video = document.createElement("video")
     video.id = "boblet_bot_input"
-    video.style.maxHeight = "200px"
+    video.style.maxHeight = "50vh"
     video.style.display = "flex"
-    video.style.margin = "auto"
-    // document.body.prepend(video)
+    video.style.bottom = "0"
+    video.style.right = "0"
+    video.style.position = "absolute"
+    document.body.append(video)
     video.autoplay = true
     video.muted = true
     video.src = fileName

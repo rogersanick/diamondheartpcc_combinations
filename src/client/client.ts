@@ -225,6 +225,7 @@ addLoadingIndicator();
     const tick = async () =>
     {
         stats.begin()
+        const delta = clock.getDelta()
 
         if (!debugObject.pause) {
             /** Boblet bot from video stream */
@@ -233,8 +234,8 @@ addLoadingIndicator();
                 if (vectorsAtFrame) {
                     const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame!, debugObject.motionDataScale)
                     bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame!)
-                    gloves.positionLeftHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
-                    gloves.positionRightHand(scaledVectorsAtFrame!, debugObject.motionDataScale)
+                    gloves.positionLeftHand(scaledVectorsAtFrame!)
+                    gloves.positionRightHand(scaledVectorsAtFrame!)
                 }
             }
 
@@ -244,8 +245,8 @@ addLoadingIndicator();
                 const vectorsAtFrame = adjustFrameForScale(
                     processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(vectorsAtFrame)
-                gloves.positionLeftHand(vectorsAtFrame, debugObject.motionDataScale)
-                gloves.positionRightHand(vectorsAtFrame, debugObject.motionDataScale)
+                gloves.positionLeftHand(vectorsAtFrame)
+                gloves.positionRightHand(vectorsAtFrame)
                 if (frame < processedCurrentJSONDataSet.length - 1) {
                     frame += 1
                 } else {
@@ -260,6 +261,9 @@ addLoadingIndicator();
             light.spotLight.lookAt(new Vector3(0,0,0))
             light.helper.update()
         }
+
+        // Rotate floor
+        floor.rotateZ(delta * 0.05)
 
         // Update controls
         controls.update()
