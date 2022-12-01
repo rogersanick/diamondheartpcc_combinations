@@ -9,12 +9,11 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 import { createBodyPoseDetector, removeVideo, setupVideo } from "./movement"
 import { addLights } from "./lights"
 import { generatePlane} from "./floor"
-import Gloves from "./gloves"
-import BobletBot from "./bobletBotModel"
+import Gloves from "./bobletBot/gloves"
+import BobletBot from "./bobletBot/bobletBotModel"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
-import e from "express"
 
 // CONSTANTS
 // TODO: Move these to another file
@@ -41,7 +40,9 @@ const movementDataSourceNames = [
     "combo_8_v2",
     "combo_9_v2",
     "combo_10_v2"
-]
+] 
+
+
 
 // EPIC: BUG FIXES
 // TODO: Fix glove rotation bug
@@ -84,6 +85,9 @@ addLoadingIndicator();
         pause: false,
     }
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
+    gui.add(debugObject, "gloveScale", 0, 0.005, 0.0005).onChange(()  => {
+        bobletBot.gloves.scale(debugObject.gloveScale)
+    })
 
     /** Set up basic statistics */
     const stats = new Stats()
@@ -166,7 +170,6 @@ addLoadingIndicator();
 
     /** Loaders */
     const gltfLoader = new GLTFLoader()
-    const gloves = new Gloves(gltfLoader, gui, debugObject, scene)
     const textureLoader = new THREE.TextureLoader()
  
     const light = addLights(scene)
@@ -209,7 +212,7 @@ addLoadingIndicator();
     controls.enableDamping = true
 
     /** Boblet bot creation */
-    const bobletBot = new BobletBot(debugObject)
+    const bobletBot = new BobletBot(gltfLoader, debugObject)
     bobletBot.addSelfToScene(scene)
 
     /** Animate */
@@ -227,8 +230,6 @@ addLoadingIndicator();
                 if (vectorsAtFrame) {
                     const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
                     bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame)
-                    gloves.positionLeftHand(scaledVectorsAtFrame)
-                    gloves.positionRightHand(scaledVectorsAtFrame)
                 }
             }
 
@@ -237,8 +238,6 @@ addLoadingIndicator();
                 const vectorsAtFrame = adjustFrameForScale(
                     processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(vectorsAtFrame)
-                gloves.positionLeftHand(vectorsAtFrame)
-                gloves.positionRightHand(vectorsAtFrame)
                 if (frame < processedCurrentJSONDataSet.length - 1) {
                     frame += 1
                 } else {

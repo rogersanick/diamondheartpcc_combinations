@@ -1,6 +1,8 @@
 import { CapsuleGeometry, Mesh, MeshToonMaterial, Scene, SphereGeometry, Vector3 } from "three"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { getPositionBetweenVectors, placeJoint, placeLimb, 
-    setPositionBetweenVectors, setPositionFromVector, setRotationFromVectors } from "./utils/vectorUtils"
+    setPositionBetweenVectors, setPositionFromVector, setRotationFromVectors } from "../utils/vectorUtils"
+import Gloves from "./gloves"
 
 class BobletBot {
   
@@ -36,9 +38,11 @@ class BobletBot {
     rightHeel: Mesh
     leftHeel: Mesh
 
+    gloves: Gloves
+
     scale = 0
 
-    constructor(debugObject: any) {
+    constructor(gltfLoader: GLTFLoader, debugObject: any) {
 
         this.debugObject = debugObject
 
@@ -75,6 +79,9 @@ class BobletBot {
         this.rightKnee = generateJoint(0.15, true)
         this.rightHeel = generateJoint(0.15, true)
         this.leftHeel = generateJoint(0.15, true)
+
+        // Give boblet some Gloves!
+        this.gloves = new Gloves(gltfLoader, debugObject)
     }
 
     // Body parts
@@ -101,7 +108,7 @@ class BobletBot {
             this.leftForearm, this.rightForearm, this.head, this.upperTorso, 
             this.middleTorso, this.lowerTorso, this.leftFoot, this.rightFoot, 
             this.leftShoulder, this.rightShoulder, this.leftElbow, this.rightElbow, 
-            this.leftHip, this.rightHip, this.leftKnee, this.rightKnee
+            this.leftHip, this.rightHip, this.leftKnee, this.rightKnee, this.gloves.leftGroup, this.gloves.rightGroup
         )
     }
 
@@ -158,6 +165,10 @@ class BobletBot {
         this.head?.setRotationFromAxisAngle(new Vector3(0,1,0), -angle + (Math.PI/2))
         this.head?.rotateY(- Math.PI / 2)
         this.head?.rotateZ(- Math.PI / 2)
+
+        // Position the gloves
+        this.gloves.positionLeftHand(points)
+        this.gloves.positionRightHand(points)
     }
 }
 

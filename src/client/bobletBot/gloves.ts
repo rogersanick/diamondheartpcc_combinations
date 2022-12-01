@@ -1,14 +1,14 @@
 import { GUI } from "dat.gui"
 import { Group, Mesh, Object3D, Scene, Vector3 } from "three"
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-import { setPositionFromVector, setRotationFromVectors } from "./utils/vectorUtils"
+import { setPositionFromVector, setRotationFromVectors } from "../utils/vectorUtils"
 
 export default class Gloves {
     leftGroup: Group = new Group()
     left: Object3D<Event> | null = null
     rightGroup: Group = new Group()
     right: Object3D<Event> | null = null
-    constructor(gltfLoader: GLTFLoader, gui: GUI, debugObject: any, scene: Scene) {
+    constructor(gltfLoader: GLTFLoader, debugObject: any) {
         gltfLoader.load("/models/boxing_gloves_left_handed/scene.gltf", (gltf) => {
             const glove = traverseSceneAndExtractChild(gltf.scene, "Boxing_Glove003_Glove_Material_0")
             glove && (glove.castShadow = true)
@@ -17,7 +17,6 @@ export default class Gloves {
             glove.scale.setScalar(debugObject.gloveScale)
             this.left = glove
             this.leftGroup.add(glove)
-            scene.add(this.leftGroup)
         })
         gltfLoader.load("/models/boxing_gloves_right_handed/scene.gltf", (gltf) => {
             const glove = traverseSceneAndExtractChild(gltf.scene, "Boxing_Glove003_Glove_Material_0")
@@ -27,11 +26,6 @@ export default class Gloves {
             glove.scale.setScalar(debugObject.gloveScale)
             this.right = glove
             this.rightGroup.add(glove)
-            scene.add(this.rightGroup)
-        })
-        gui.add(debugObject, "gloveScale", 0, 0.005, 0.0005).onChange(()  => {
-            this.left?.scale.setScalar(debugObject.gloveScale)
-            this.right?.scale.setScalar(debugObject.gloveScale)
         })
     }
 
@@ -75,6 +69,11 @@ export default class Gloves {
         const knucklesVector = right_pinky.sub(right_index)
         const knucklesAngle = knucklesVector.angleTo(new Vector3(0, -1, 0))
         this.right?.rotation.set(0, -knucklesAngle, 0)
+    }
+
+    scale(number: number) {
+        this.leftGroup?.scale.setScalar(number)
+        this.rightGroup?.scale.setScalar(number)
     }
 
     
