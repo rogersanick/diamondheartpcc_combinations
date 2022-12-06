@@ -53,7 +53,7 @@ addLoadingIndicator();
         movement_data: movementDataSourceNames[0],
         gloveScale: 0.0009,
         pause: false,
-        model: "full"
+        model: "light"
     }
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
 
@@ -74,7 +74,7 @@ addLoadingIndicator();
     // Video Data Configuration
     let video: HTMLVideoElement = 
         await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
-    let poseDetector: poseDetection.PoseDetector = await createBlazePoseDetector("full")
+    let poseDetector: poseDetection.PoseDetector = await createBlazePoseDetector("light")
     gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
         if (video) {
             video.playbackRate = debugObject.playbackSpeed
