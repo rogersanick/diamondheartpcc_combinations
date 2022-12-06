@@ -1,7 +1,7 @@
 import { Quaternion, ArrowHelper, Euler, Object3D, Vector3 } from "three"
 
-const lerpValue = 0.5
-const slerpValue = 0.7
+const lerpValue = 0.8
+const slerpValue = 0.8
 
 // Get rotation from vectors 
 const getRotationFromVectors = (vector1: Vector3, vector2: Vector3) => {
@@ -28,7 +28,7 @@ const getPositionBetweenVectors = (vector1: Vector3, vector2: Vector3) => {
 }
 
 const setPositionFromVector = (vector: Vector3, object: Object3D) => {
-    object.position.set(vector.x, vector.y, vector.z)
+    object.position.lerp(vector, lerpValue)
 }
 
 // Set position between two vectors
@@ -50,12 +50,12 @@ const placeLimb = (vector1: Vector3, vector2: Vector3, object: Object3D) => {
 
 // Adjust vector for motion data scale
 const adjustVectorForScale = (vector: Vector3, scale: number) => {
-    const vectorToReturn = new Vector3(vector.x, vector.y, vector.z)
-    const { x, y, z } = vectorToReturn
-    vectorToReturn.x = -x * scale
-    vectorToReturn.y = -(y * scale - scale)
-    vectorToReturn.z = -z! * scale
-    return vectorToReturn
+    const { x, y, z } = vector
+    return new Vector3(
+        -x * scale,
+        -(y * scale - scale),
+        -z! * scale
+    ) 
 }
 
 // Adjust frame for scale

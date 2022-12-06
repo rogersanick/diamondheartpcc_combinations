@@ -1,3 +1,4 @@
+import { Material } from "cannon-es"
 import { CapsuleGeometry, Mesh, MeshToonMaterial, Scene, SphereGeometry, Vector3 } from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { getPositionBetweenVectors, placeJoint, placeLimb, 
@@ -37,8 +38,11 @@ class BobletBot {
     rightKnee: Mesh
     rightHeel: Mesh
     leftHeel: Mesh
+    rightHand: Mesh
+    leftHand: Mesh
 
-    gloves: Gloves
+    // TODO: Fix gloves
+    // gloves: Gloves
 
     scale = 0
 
@@ -66,22 +70,24 @@ class BobletBot {
         this.rightFoot = this.generateLimb(0.1)
 
         // Add all joints
-        const generateJoint = (radius: number, blue = false) => { 
-            return new Mesh(new SphereGeometry(radius, 32, 32), blue ? this.bodyBlueMaterial : this.bodyWhiteMaterial)
+        const generateJoint = (radius: number, material: MeshToonMaterial = this.bodyBlueMaterial) => { 
+            return new Mesh(new SphereGeometry(radius, 32, 32), material)
         }
         this.leftShoulder = generateJoint(0.25)
         this.rightShoulder = generateJoint(0.25)
-        this.leftElbow = generateJoint(0.15, true)
-        this.rightElbow = generateJoint(0.15, true)
+        this.leftElbow = generateJoint(0.15, this.bodyBlueMaterial)
+        this.rightElbow = generateJoint(0.15, this.bodyBlueMaterial)
         this.leftHip = generateJoint(0.2)
         this.rightHip = generateJoint(0.2)
-        this.leftKnee = generateJoint(0.15, true)
-        this.rightKnee = generateJoint(0.15, true)
-        this.rightHeel = generateJoint(0.15, true)
-        this.leftHeel = generateJoint(0.15, true)
+        this.leftKnee = generateJoint(0.15, this.bodyBlueMaterial)
+        this.rightKnee = generateJoint(0.15, this.bodyBlueMaterial)
+        this.rightHeel = generateJoint(0.15, this.bodyBlueMaterial)
+        this.leftHeel = generateJoint(0.15, this.bodyBlueMaterial)
+        this.rightHand = generateJoint(0.3, this.bodyRedMaterial)
+        this.leftHand = generateJoint(0.3, this.bodyRedMaterial)
 
         // Give boblet some Gloves!
-        this.gloves = new Gloves(gltfLoader, debugObject)
+        // this.gloves = new Gloves(gltfLoader, debugObject)
     }
 
     // Body parts
@@ -91,6 +97,10 @@ class BobletBot {
 
     bodyWhiteMaterial = new MeshToonMaterial({
         color: 0xffffff,
+    })
+
+    bodyRedMaterial = new MeshToonMaterial({
+        color: 0xf43634,
     })
 
     generateLimb = (length: number, blue = false, width?: number) => {
@@ -108,7 +118,7 @@ class BobletBot {
             this.leftForearm, this.rightForearm, this.head, this.upperTorso, 
             this.middleTorso, this.lowerTorso, this.leftFoot, this.rightFoot, 
             this.leftShoulder, this.rightShoulder, this.leftElbow, this.rightElbow, 
-            this.leftHip, this.rightHip, this.leftKnee, this.rightKnee, this.gloves.leftGroup, this.gloves.rightGroup
+            this.leftHip, this.rightHip, this.leftKnee, this.rightKnee, this.rightHand, this.leftHand
         )
     }
 
@@ -137,6 +147,8 @@ class BobletBot {
         placeJoint(points["right_knee"], this.rightKnee)
         placeJoint(points["left_heel"], this.leftHeel)
         placeJoint(points["right_heel"], this.rightHeel)
+        placeJoint(points["left_wrist"], this.leftHand)
+        placeJoint(points["right_wrist"], this.rightHand)
       
         // Set the position of the torso
         const shouldersMidpoint = getPositionBetweenVectors(points["left_shoulder"], points["right_shoulder"])
@@ -146,7 +158,6 @@ class BobletBot {
         setPositionFromVector(shouldersMidpoint, this.upperTorso)
         setPositionBetweenVectors(shouldersMidpoint, spineMidpoint, this.middleTorso)
         setPositionBetweenVectors(hipsMidpoint, spineMidpoint, this.lowerTorso)
-      
       
         setRotationFromVectors(points["left_shoulder"], points["right_shoulder"], this.upperTorso)
         setRotationFromVectors(points["left_hip"], points["right_hip"], this.lowerTorso)
@@ -159,16 +170,6 @@ class BobletBot {
         const rightEarVector = points["right_ear"]
         const betweenEars = leftEarVector.clone().add(rightEarVector).divideScalar(2)
         setPositionBetweenVectors(noseVector, betweenEars, this.head)
-        const xDiff = noseVector.x - betweenEars.x
-        const zDiff = noseVector.z - betweenEars.z
-        const angle = Math.atan2(zDiff, xDiff)
-        this.head?.setRotationFromAxisAngle(new Vector3(0,1,0), -angle + (Math.PI/2))
-        this.head?.rotateY(- Math.PI / 2)
-        this.head?.rotateZ(- Math.PI / 2)
-
-        // Position the gloves
-        this.gloves.positionLeftHand(points)
-        this.gloves.positionRightHand(points)
     }
 }
 

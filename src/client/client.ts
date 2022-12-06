@@ -15,18 +15,11 @@ import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/v
 import { adjustFrameForScale } from "./utils/vectorUtils"
 import { movementDataSourceNames } from "./movement"
 
-// CONSTANTS
-// TODO: Move these to another file
-/** List out data set names */
-
-
-
 // EPIC: BUG FIXES
 // TODO: Fix glove rotation bug
 
 // EPIC: USABILITY
 // TODO: Enable full switching btw JSON / video by fromVideo
-// TODO: Get rid of chatter
 
 // EPIC: PERFORMANCE / MOBILE
 // TODO: Node script OR UI for extracting reliable PER FRAME pose data from input
@@ -63,9 +56,6 @@ addLoadingIndicator();
         model: "full"
     }
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
-    gui.add(debugObject, "gloveScale", 0, 0.005, 0.0005).onChange(()  => {
-        bobletBot.gloves.scale(debugObject.gloveScale)
-    })
 
     /** Set up basic statistics */
     const stats = new Stats()
@@ -108,6 +98,7 @@ addLoadingIndicator();
         if (ele) {
             debugObject.pause = true
             video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
+            poseDetector.reset()
             debugObject.pause = false
         } else {
             // Start at the beginning 
@@ -235,7 +226,6 @@ addLoadingIndicator();
             light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
             light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
             light.spotLight.lookAt(new Vector3(0,0,0))
-            light.helper.update()
         }
 
         // Rotate floor
