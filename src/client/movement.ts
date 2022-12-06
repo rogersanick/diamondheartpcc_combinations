@@ -18,8 +18,9 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     video.style.right = "0"
     video.style.position = "absolute"
     document.body.append(video)
-    video.autoplay = true
     video.muted = true
+    video.playsInline = true
+    video.autoplay = true
     video.src = fileName
     video.playbackRate = playbackSpeed
     // const camera = await navigator.mediaDevices.getUserMedia({ video: true })
