@@ -49,14 +49,16 @@ const interpolateData = (keypoint: any, nextKeyPoint: any) => {
                 const currPose = currFrame[0]
                 const prevPose = prevFrame[0]
                 currPose.keypoints3D.map((_: any, index: number) => {
-                    interpolateData(currPose.keypoints3D[index], prevPose.keypoints3D[index]).forEach((interpolatedKeypoint: any, i: number) => {
-                        framesToBePopulated[i][0].keypoints3D.push(interpolatedKeypoint)
-                    })
+                    interpolateData(currPose.keypoints3D[index], prevPose.keypoints3D[index])
+                        .forEach((interpolatedKeypoint: any, i: number) => {
+                            framesToBePopulated[i][0].keypoints3D.push(interpolatedKeypoint)
+                        })
                 })
                 processed.push(...framesToBePopulated)
             }
             const fileNameWithoutExtension = fileName.split(".")[0]
-            await fs.writeFileSync(`${path}/${fileNameWithoutExtension}_interpolated.json`,JSON.stringify(processed),{encoding:"utf8",flag:"w"})
+            await fs.writeFileSync(`${path}/${fileNameWithoutExtension}_interpolated.json`,
+                JSON.stringify(processed),{encoding:"utf8",flag:"w"})
         })
     }
 })()

@@ -1,7 +1,6 @@
 import { Vector3 } from "three"
 import * as poseDetection from "@tensorflow-models/pose-detection"
-import { createBodyPoseDetector } from "../movement"
-import { adjustVectorForScale } from "./vectorUtils"
+import { createBlazePoseDetector } from "../movement"
 
 /** Process JSON frame data to Vectors */
 const processJSONFrameToVectors = (data: any[], debugObject: any) => {
@@ -22,7 +21,7 @@ const processJSONFrameToVectors = (data: any[], debugObject: any) => {
 
 /** Process video frame to Vectors */
 const processVideoFrameToVectors = (poseDetector: poseDetection.PoseDetector, 
-    video: HTMLVideoElement, debugObject: any) => {
+    video: HTMLVideoElement) => {
     return poseDetector?.estimatePoses(
         video, {
             flipHorizontal: true,
@@ -44,7 +43,7 @@ const processVideoFrameToVectors = (poseDetector: poseDetection.PoseDetector,
 
 /** A utility which extracts movement data from the provided video input */
 const processVideoMovementData = async (video: HTMLVideoElement) => {
-    const poseDetector = await createBodyPoseDetector()
+    const poseDetector = await createBlazePoseDetector("heavy")
     const results: any[] = []
     video.loop = false
     while(!video.paused) {

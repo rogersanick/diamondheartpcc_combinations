@@ -6,10 +6,9 @@ import * as poseDetection from "@tensorflow-models/pose-detection"
 import Stats from "stats.js"
 import { Vector3, WebGLRenderer } from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import { createBodyPoseDetector, removeVideo, setupVideo } from "./movement"
+import { createBlazePoseDetector, removeVideo, setupVideo } from "./movement"
 import { addLights } from "./lights"
 import { generatePlane} from "./floor"
-import Gloves from "./bobletBot/gloves"
 import BobletBot from "./bobletBot/bobletBotModel"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
@@ -41,7 +40,6 @@ const movementDataSourceNames = [
     "combo_9_v2",
     "combo_10_v2"
 ] 
-
 
 
 // EPIC: BUG FIXES
@@ -77,7 +75,7 @@ addLoadingIndicator();
     /** GUI Setup & Stats setup */
     const gui = new GUI()
     const debugObject = {
-        fromVideo: false,
+        fromVideo: true,
         playbackSpeed: 1,
         motionDataScale: 5,
         movement_data: "fight_stance",
@@ -104,8 +102,9 @@ addLoadingIndicator();
     let processedCurrentJSONDataSet: any = await retrieveExtractedJSONData(debugObject.movement_data)
 
     // Video Data Configuration
-    let video: HTMLVideoElement | null = null
-    let poseDetector: poseDetection.PoseDetector | null = null
+    let video: HTMLVideoElement = 
+        await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
+    let poseDetector: poseDetection.PoseDetector = await createBlazePoseDetector("light")
     gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
         if (video) {
             video.playbackRate = debugObject.playbackSpeed
@@ -122,8 +121,9 @@ addLoadingIndicator();
     // Conditionally reset either the JSON or Video data source
     const resetDataSource = async (ele: boolean) => {
         if (ele) {
-            if (!poseDetector) { poseDetector = await createBodyPoseDetector() }
+            debugObject.pause = true
             video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
+            debugObject.pause = false
         } else {
             // Start at the beginning 
             frame = 0
@@ -226,7 +226,7 @@ addLoadingIndicator();
         if (!debugObject.pause) {
             /** Boblet bot from video stream */
             if (debugObject.fromVideo && video && poseDetector) {
-                const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video, debugObject)
+                const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video)
                 if (vectorsAtFrame) {
                     const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
                     bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame)

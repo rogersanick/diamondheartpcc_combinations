@@ -9,7 +9,7 @@ export default class Gloves {
     rightGroup: Group = new Group()
     right: Object3D<Event> | null = null
     constructor(gltfLoader: GLTFLoader, debugObject: any) {
-        gltfLoader.load("/models/boxing_gloves_left_handed/scene.gltf", (gltf) => {
+        gltfLoader.load("/models/boxing_gloves_right_handed/scene.gltf", (gltf) => {
             const glove = traverseSceneAndExtractChild(gltf.scene, "Boxing_Glove003_Glove_Material_0")
             glove && (glove.castShadow = true)
             glove && (glove.receiveShadow = true)
@@ -18,7 +18,7 @@ export default class Gloves {
             this.left = glove
             this.leftGroup.add(glove)
         })
-        gltfLoader.load("/models/boxing_gloves_right_handed/scene.gltf", (gltf) => {
+        gltfLoader.load("/models/boxing_gloves_left_handed/scene.gltf", (gltf) => {
             const glove = traverseSceneAndExtractChild(gltf.scene, "Boxing_Glove003_Glove_Material_0")
             glove && (glove.castShadow = true)
             glove && (glove.receiveShadow = true)
@@ -46,7 +46,7 @@ export default class Gloves {
         setRotationFromVectors(left_wrist, left_elbow, this.leftGroup, 0.7)
 
         // Rotate wrist rotation
-        const knucklesVector = left_index.sub(left_pinky)
+        const knucklesVector = left_pinky.clone().sub(left_index)
         const knucklesAngle = knucklesVector.angleTo(new Vector3(0, -1, 0))
         this.left?.rotation.set(this.left?.rotation.x, knucklesAngle, this.left?.rotation.z)
     }
@@ -66,7 +66,7 @@ export default class Gloves {
         setRotationFromVectors(right_wrist, right_elbow, this.rightGroup, 0.7)
 
         // Rotate wrist to elbow
-        const knucklesVector = right_pinky.sub(right_index)
+        const knucklesVector = right_index.clone().sub(right_pinky)
         const knucklesAngle = knucklesVector.angleTo(new Vector3(0, -1, 0))
         this.right?.rotation.set(0, -knucklesAngle, 0)
     }
