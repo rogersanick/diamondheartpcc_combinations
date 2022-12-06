@@ -57,7 +57,7 @@ class BobletBot {
         this.rightForearm = this.generateLimb(0.15)
 
         // Make the torso
-        this.head = new Mesh(new SphereGeometry(0.7, 16, 16), this.bodyWhiteMaterial)
+        this.head = new Mesh(new SphereGeometry(0.5, 16, 16), this.bodyWhiteMaterial)
         this.upperTorso = this.generateLimb (0.15, true, 0.4)
         this.middleTorso = this.generateLimb (0.2, false, 0.35)
         this.lowerTorso = this.generateLimb(0.1, true, 0.35)

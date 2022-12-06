@@ -13,33 +13,12 @@ import BobletBot from "./bobletBot/bobletBotModel"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
+import { movementDataSourceNames } from "./movement"
 
 // CONSTANTS
 // TODO: Move these to another file
 /** List out data set names */
-const movementDataSourceNames = [
-    "fight_stance", 
-    "combo_1", 
-    "combo_2", 
-    "combo_3",
-    "combo_4",
-    "combo_5",
-    "combo_6",
-    "combo_7",
-    "combo_8",
-    "combo_9",
-    "combo_10",
-    "combo_1_v2", 
-    "combo_2_v2", 
-    "combo_3_v2",
-    "combo_4_v2",
-    "combo_5_v2",
-    "combo_6_v2",
-    "combo_7_v2",
-    "combo_8_v2",
-    "combo_9_v2",
-    "combo_10_v2"
-] 
+
 
 
 // EPIC: BUG FIXES
@@ -78,9 +57,10 @@ addLoadingIndicator();
         fromVideo: true,
         playbackSpeed: 1,
         motionDataScale: 5,
-        movement_data: "fight_stance",
+        movement_data: movementDataSourceNames[0],
         gloveScale: 0.0009,
         pause: false,
+        model: "full"
     }
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
     gui.add(debugObject, "gloveScale", 0, 0.005, 0.0005).onChange(()  => {
@@ -104,7 +84,7 @@ addLoadingIndicator();
     // Video Data Configuration
     let video: HTMLVideoElement = 
         await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
-    let poseDetector: poseDetection.PoseDetector = await createBlazePoseDetector("light")
+    let poseDetector: poseDetection.PoseDetector = await createBlazePoseDetector("full")
     gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
         if (video) {
             video.playbackRate = debugObject.playbackSpeed
@@ -116,6 +96,11 @@ addLoadingIndicator();
         } else {
             video?.play()
         }
+    })
+    gui.add(debugObject, "model", ["light", "full", "heavy"]).onChange(async (value) => {
+        video?.pause()
+        poseDetector = await createBlazePoseDetector(value)
+        video?.play()
     })
 
     // Conditionally reset either the JSON or Video data source

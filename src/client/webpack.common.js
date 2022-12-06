@@ -1,6 +1,6 @@
 const path = require("path")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
-const TerserPlugin = require("terser-webpack-plugin")
+const CompressionPlugin = require("compression-webpack-plugin")
 
 module.exports = {
     entry: "./src/client/client.ts",
@@ -32,6 +32,9 @@ module.exports = {
                 { from: path.resolve(__dirname, "index.html") }
             ]
         }),
+        new CompressionPlugin({
+            algorithm: "gzip",
+        })
     ],
     resolve: {
         alias: {

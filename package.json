@@ -43,6 +43,7 @@
     "@mediapipe/pose": "^0.5.1635988162",
     "@tensorflow-models/hand-pose-detection": "^2.0.0",
     "@tensorflow-models/pose-detection": "^2.0.0",
+    "compression-webpack-plugin": "^10.0.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "express": "^4.17.3",
