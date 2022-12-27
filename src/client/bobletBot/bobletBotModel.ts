@@ -1,9 +1,7 @@
-import { Material } from "cannon-es"
 import { CapsuleGeometry, Mesh, MeshToonMaterial, Scene, SphereGeometry, Vector3 } from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { getPositionBetweenVectors, placeJoint, placeLimb, 
     setPositionBetweenVectors, setPositionFromVector, setRotationFromVectors } from "../utils/vectorUtils"
-import Gloves from "./gloves"
 
 class BobletBot {
   

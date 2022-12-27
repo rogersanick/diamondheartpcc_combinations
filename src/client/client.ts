@@ -47,7 +47,7 @@ addLoadingIndicator();
     /** GUI Setup & Stats setup */
     const gui = new GUI()
     const debugObject = {
-        fromVideo: true,
+        mode: "fromVideo",
         playbackSpeed: 1,
         motionDataScale: 5,
         movement_data: movementDataSourceNames[0],
@@ -94,13 +94,13 @@ addLoadingIndicator();
     })
 
     // Conditionally reset either the JSON or Video data source
-    const resetDataSource = async (ele: boolean) => {
-        if (ele) {
+    const resetDataSource = async (ele: string) => {
+        if (ele === "fromVideo") {
             debugObject.pause = true
             video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
             poseDetector.reset()
             debugObject.pause = false
-        } else {
+        } else if (ele === "fromJSON") {
             // Start at the beginning 
             frame = 0
     
@@ -124,11 +124,11 @@ addLoadingIndicator();
         "movement_data", 
         movementDataSourceNames
     ).onChange(async () => {
-        resetDataSource(debugObject.fromVideo)
+        resetDataSource(debugObject.mode)
     })
 
     // Allow user to switch between video and JSON data source
-    gui.add(debugObject, "fromVideo").onChange(resetDataSource)
+    gui.add(debugObject, "mode", ["fromVideo", "fromJSON", "extract"]).onChange(resetDataSource)
 
     /** Setup renderer and scene */
     const canvas = document.querySelector("canvas.webgl")!
@@ -191,6 +191,39 @@ addLoadingIndicator();
     const bobletBot = new BobletBot(gltfLoader, debugObject)
     bobletBot.addSelfToScene(scene)
 
+    /** Operating functions */
+    const processFromVideoMode = async () => {
+        // Time variables
+        const delta = clock.getDelta()
+        
+        /** Boblet bot from video stream */
+        if (video && poseDetector) {
+            const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video)
+            if (vectorsAtFrame) {
+                const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
+                bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame)
+            }
+        }
+    
+        // Rotate floor
+        floor.rotateZ(delta * 0.05)
+    
+        // Update controls
+        controls.update()
+    }
+
+    const processFromJSONMode = async () => {
+        /** Boblet bot from JSON */
+        const vectorsAtFrame = adjustFrameForScale(
+            processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
+        bobletBot.positionSelfFromMotionData(vectorsAtFrame)
+        if (frame < processedCurrentJSONDataSet.length - 1) {
+            frame += 1
+        } else {
+            frame = 0
+        }
+    }
+
     /** Animate */
     const clock = new THREE.Clock()
     let frame = 0
@@ -200,25 +233,11 @@ addLoadingIndicator();
         const delta = clock.getDelta()
 
         if (!debugObject.pause) {
-            /** Boblet bot from video stream */
-            if (debugObject.fromVideo && video && poseDetector) {
-                const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video)
-                if (vectorsAtFrame) {
-                    const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
-                    bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame)
-                }
-            }
 
-            /** Boblet bot from JSON */
-            if (!debugObject.fromVideo) {
-                const vectorsAtFrame = adjustFrameForScale(
-                    processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
-                bobletBot.positionSelfFromMotionData(vectorsAtFrame)
-                if (frame < processedCurrentJSONDataSet.length - 1) {
-                    frame += 1
-                } else {
-                    frame = 0
-                }
+            if (debugObject.mode) {
+                processFromVideoMode()
+            } else {
+                processFromJSONMode()
             }
 
             // Move the light
@@ -227,12 +246,6 @@ addLoadingIndicator();
             light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
             light.spotLight.lookAt(new Vector3(0,0,0))
         }
-
-        // Rotate floor
-        floor.rotateZ(delta * 0.05)
-
-        // Update controls
-        controls.update()
 
         // Render 
         renderer.render(scene, camera)
