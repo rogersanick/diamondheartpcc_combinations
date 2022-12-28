@@ -70,7 +70,7 @@ addLoadingIndicator();
         const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
         return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
     }
-    let processedCurrentJSONDataSet: any = await retrieveExtractedJSONDataV1(debugObject.movement_data)
+    let processedCurrentJSONDataSetV1: any = await retrieveExtractedJSONDataV1(debugObject.movement_data)
 
     // JSON Data Configuration V2
     const retrieveExtractedJSONDataV2 = async (dataSetName: string) => {
@@ -83,7 +83,7 @@ addLoadingIndicator();
             return processedFrame
         })
     }
-    const processedCurrentJSONDataSetV2: any = await retrieveExtractedJSONDataV2(debugObject.movement_data)
+    let processedCurrentJSONDataSetV2: any = await retrieveExtractedJSONDataV2(debugObject.movement_data)
 
     // Video Data Configuration
     let video: HTMLVideoElement = 
@@ -119,7 +119,7 @@ addLoadingIndicator();
             frame = 0
                 
             // Get the initial JSON data
-            processedCurrentJSONDataSet = await retrieveExtractedJSONDataV1(debugObject.movement_data)
+            processedCurrentJSONDataSetV1 = await retrieveExtractedJSONDataV1(debugObject.movement_data)
                 
             // Remove the initial video source
             removeVideo()
@@ -128,7 +128,7 @@ addLoadingIndicator();
             frame = 0
                             
             // Get the initial JSON data
-            processedCurrentJSONDataSet = await retrieveExtractedJSONDataV2(debugObject.movement_data)
+            processedCurrentJSONDataSetV2 = await retrieveExtractedJSONDataV2(debugObject.movement_data)
                             
             // Remove the initial video source
             removeVideo()
@@ -265,9 +265,9 @@ addLoadingIndicator();
     const processFromJSONMode = async () => {
         /** Boblet bot from JSON */
         const vectorsAtFrame = adjustFrameForScale(
-            processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
+            processedCurrentJSONDataSetV1[frame][0], debugObject.motionDataScale)
         bobletBot.positionSelfFromMotionData(vectorsAtFrame)
-        if (frame < processedCurrentJSONDataSet.length - 1) {
+        if (frame < processedCurrentJSONDataSetV1.length - 1) {
             frame += 1
         } else {
             frame = 0
@@ -278,7 +278,7 @@ addLoadingIndicator();
     const processFromJSONModeV2 = async () => {
         /** Boblet bot from JSON */
         bobletBot.positionSelfFromMotionData(processedCurrentJSONDataSetV2[frame])
-        if (frame < processedCurrentJSONDataSet.length - 1) {
+        if (frame < processedCurrentJSONDataSetV2.length - 1) {
             frame += 1
         } else {
             frame = 0
