@@ -16,7 +16,6 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     video.style.display = "flex"
     video.style.bottom = "0"
     video.style.right = "0"
-    video.style.display ="none"
     video.style.position = "absolute"
     document.body.append(video)
     video.muted = true
@@ -28,12 +27,11 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     // video.srcObject = camera
     video.play()
     video.loop = true
-    await new Promise((resolve) => {
+    return await new Promise<HTMLVideoElement>((resolve) => {
         video.onloadeddata = () => {
             resolve(video)
         }
     })
-    return video
 }
 
 const removeVideo = () => {

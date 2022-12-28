@@ -14,6 +14,7 @@ import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
 import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
 import { movementDataSourceNames } from "./movement"
+import e from "express"
 
 // EPIC: BUG FIXES
 // TODO: Fix glove rotation bug
@@ -64,12 +65,25 @@ addLoadingIndicator();
 
     /** Data Source (either JSON or VIDEO, default to JSON for mobile) */
 
-    // JSON Data Configuration
-    const retrieveExtractedJSONData = async (dataSetName: string) => {
+    // JSON Data Configuration V1 (deprecated)
+    const retrieveExtractedJSONDataV1 = async (dataSetName: string) => {
         const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
         return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
     }
-    let processedCurrentJSONDataSet: any = await retrieveExtractedJSONData(debugObject.movement_data)
+    let processedCurrentJSONDataSet: any = await retrieveExtractedJSONDataV1(debugObject.movement_data)
+
+    // JSON Data Configuration V2
+    const retrieveExtractedJSONDataV2 = async (dataSetName: string) => {
+        const json = await fetch(`/motion_data_v2/${dataSetName}.json`).then(res => res.json())
+        return json.map((frame: any) => {
+            const processedFrame: any = {}
+            Object.entries(frame).forEach(([key, value]: any) => {
+                processedFrame[key] = new Vector3(value.x, value.y, value.z)
+            })
+            return processedFrame
+        })
+    }
+    const processedCurrentJSONDataSetV2: any = await retrieveExtractedJSONDataV2(debugObject.movement_data)
 
     // Video Data Configuration
     let video: HTMLVideoElement = 
@@ -103,16 +117,19 @@ addLoadingIndicator();
         } else if (ele === "fromJSON") {
             // Start at the beginning 
             frame = 0
-    
-            // Retrieve all of the movement data
-            const retrieveExtractedJSONData = async (dataSetName: string) => {
-                const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
-                return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
-            }
                 
             // Get the initial JSON data
-            processedCurrentJSONDataSet = await retrieveExtractedJSONData(debugObject.movement_data)
+            processedCurrentJSONDataSet = await retrieveExtractedJSONDataV1(debugObject.movement_data)
                 
+            // Remove the initial video source
+            removeVideo()
+        } else if (ele === "fromJSONV2") {
+            // Start at the beginning 
+            frame = 0
+                            
+            // Get the initial JSON data
+            processedCurrentJSONDataSet = await retrieveExtractedJSONDataV2(debugObject.movement_data)
+                            
             // Remove the initial video source
             removeVideo()
         }
@@ -128,7 +145,7 @@ addLoadingIndicator();
     })
 
     // Allow user to switch between video and JSON data source
-    gui.add(debugObject, "mode", ["fromVideo", "fromJSON", "extract"]).onChange(resetDataSource)
+    gui.add(debugObject, "mode", ["fromVideo", "fromJSON", "fromJSONV2", "extract"]).onChange(resetDataSource)
 
     /** Setup renderer and scene */
     const canvas = document.querySelector("canvas.webgl")!
@@ -192,6 +209,38 @@ addLoadingIndicator();
     bobletBot.addSelfToScene(scene)
 
     /** Operating functions */
+
+    // Extract data from video
+    const dataHolder: { [key: string]: Vector3 }[] = []
+    let progress: "setup" | "extracting" | "logging" | "done" = "setup"
+    const extractDataFromVideo = async () => {
+        if (progress === "setup") {
+            debugObject.pause = true
+            poseDetector.reset()
+            video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
+            video.style.display ="none"
+            video.loop = false
+            progress = "extracting"
+            debugObject.pause = false
+        } else if (progress === "extracting") {
+            if (poseDetector && !video.paused) {
+                const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video)
+                if (vectorsAtFrame) {
+                    const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
+                    dataHolder.push(scaledVectorsAtFrame)
+                }
+            } else {
+                progress = "logging"
+            }
+        } else if (progress === "logging") {
+            console.log(JSON.stringify(dataHolder))
+            progress = "done"
+        } else if (progress === "done") {
+            return
+        }
+    }
+
+    // Process from live video
     const processFromVideoMode = async () => {
         // Time variables
         const delta = clock.getDelta()
@@ -212,11 +261,23 @@ addLoadingIndicator();
         controls.update()
     }
 
+    // Process from JSON
     const processFromJSONMode = async () => {
         /** Boblet bot from JSON */
         const vectorsAtFrame = adjustFrameForScale(
             processedCurrentJSONDataSet[frame][0], debugObject.motionDataScale)
         bobletBot.positionSelfFromMotionData(vectorsAtFrame)
+        if (frame < processedCurrentJSONDataSet.length - 1) {
+            frame += 1
+        } else {
+            frame = 0
+        }
+    }
+
+    // Process from JSON upgraded
+    const processFromJSONModeV2 = async () => {
+        /** Boblet bot from JSON */
+        bobletBot.positionSelfFromMotionData(processedCurrentJSONDataSetV2[frame])
         if (frame < processedCurrentJSONDataSet.length - 1) {
             frame += 1
         } else {
@@ -234,21 +295,31 @@ addLoadingIndicator();
 
         if (!debugObject.pause) {
 
-            if (debugObject.mode) {
-                processFromVideoMode()
+            const fromVideo = debugObject.mode === "fromVideo"
+            const fromJSON = debugObject.mode === "fromJSON"
+            const fromJSONV2 = debugObject.mode === "fromJSONV2"
+
+            if (fromVideo || fromJSON || fromJSONV2) {
+                if (fromVideo) {
+                    processFromVideoMode()
+                } else if (fromJSON) {
+                    processFromJSONMode()
+                } else {
+                    processFromJSONModeV2()
+                }
+
+                // Move the light
+                const elapsedTime = clock.getElapsedTime()
+                light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
+                light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
+                light.spotLight.lookAt(new Vector3(0,0,0))
+
+                // Render 
+                renderer.render(scene, camera)
             } else {
-                processFromJSONMode()
+                extractDataFromVideo()
             }
-
-            // Move the light
-            const elapsedTime = clock.getElapsedTime()
-            light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
-            light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
-            light.spotLight.lookAt(new Vector3(0,0,0))
         }
-
-        // Render 
-        renderer.render(scene, camera)
  
         stats.end()
         requestAnimationFrame(tick)
