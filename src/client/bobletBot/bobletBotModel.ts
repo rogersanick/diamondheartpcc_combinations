@@ -1,7 +1,7 @@
 import { CapsuleGeometry, Mesh, MeshToonMaterial, Scene, SphereGeometry, Vector3 } from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-import { getPositionBetweenVectors, placeJoint, placeLimb, 
-    setPositionBetweenVectors, setPositionFromVector, setRotationFromVectors } from "../utils/vectorUtils"
+import { getPositionBetweenVectors, placeJoint, placeLimb, setPositionBetweenVectors, 
+    setPositionFromVector, setRotationFromVectors, updateLerpValue, updateSlerpValue } from "../utils/vectorUtils"
 
 class BobletBot {
   
@@ -120,7 +120,11 @@ class BobletBot {
         )
     }
 
-    positionSelfFromMotionData(points: {[key: string]: Vector3}) {
+    positionSelfFromMotionData(points: {[key: string]: Vector3}, slerpValue = 0.8, lerpValue = 0.8) {
+
+        // Set the lerp / slerp values
+        updateLerpValue(lerpValue)
+        updateSlerpValue(slerpValue)
 
         // Set the position of all limbs
         placeLimb(points["left_knee"], points["left_ankle"], this.leftShin)

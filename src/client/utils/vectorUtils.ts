@@ -1,7 +1,11 @@
 import { Quaternion, ArrowHelper, Euler, Object3D, Vector3 } from "three"
 
-const lerpValue = 0.8
-const slerpValue = 0.8
+let lerpValue = 0.8
+const updateLerpValue = ((value: number) => lerpValue = value)
+let slerpValue = 0.8
+const updateSlerpValue = ((value: number) => slerpValue = value)
+
+
 
 // Get rotation from vectors 
 const getRotationFromVectors = (vector1: Vector3, vector2: Vector3) => {
@@ -70,5 +74,6 @@ const adjustFrameForScale = (frame: { [key: string]: Vector3 }, scale: number) =
 export { 
     adjustFrameForScale, adjustVectorForScale, placeJoint, setPositionFromVector, 
     getRotationFromVectors, setRotationFromVectors, setRotationFromVector, 
-    setPositionBetweenVectors, placeLimb, getPositionBetweenVectors 
+    setPositionBetweenVectors, placeLimb, getPositionBetweenVectors,
+    updateLerpValue, updateSlerpValue
 }

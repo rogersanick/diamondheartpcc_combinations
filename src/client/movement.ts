@@ -13,6 +13,7 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     video = document.createElement("video")
     video.id = "boblet_bot_input"
     video.style.maxHeight = "50vh"
+    video.style.margin = "-50px"
     video.style.display = "flex"
     video.style.bottom = "0"
     video.style.right = "0"
@@ -25,10 +26,10 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     video.playbackRate = playbackSpeed
     // const camera = await navigator.mediaDevices.getUserMedia({ video: true })
     // video.srcObject = camera
-    video.play()
     video.loop = true
     return await new Promise<HTMLVideoElement>((resolve) => {
         video.onloadeddata = () => {
+            video.play()
             resolve(video)
         }
     })
@@ -52,6 +53,14 @@ const createBlazePoseDetector = async (modelType: "light" | "full" | "heavy") =>
         enableSmoothing: true,
         runtime: "mediapipe", // or 'tfjs'
         modelType: modelType,
+        solutionPath: `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${mpPose.VERSION}`
+    })
+}
+
+const createMoveNetPoseDetector = async () => {
+    return await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, {
+        runtime: "mediapipe",
+        modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER,
         solutionPath: `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${mpPose.VERSION}`
     })
 }
@@ -80,4 +89,5 @@ const movementDataSourceNames = [
     "combo_10_v1"
 ] 
 
-export { movementDataSourceNames, setupVideo, removeVideo, createHandPoseDetector, createBlazePoseDetector }
+export { movementDataSourceNames, setupVideo, removeVideo, 
+    createHandPoseDetector, createBlazePoseDetector, createMoveNetPoseDetector }

@@ -6,15 +6,15 @@ import * as poseDetection from "@tensorflow-models/pose-detection"
 import Stats from "stats.js"
 import { Vector3, WebGLRenderer } from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import { createBlazePoseDetector, removeVideo, setupVideo } from "./movement"
+import { createBlazePoseDetector, createMoveNetPoseDetector, setupVideo } from "./movement"
 import { addLights } from "./lights"
 import { generatePlane} from "./floor"
 import BobletBot from "./bobletBot/bobletBotModel"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
-import { processJSONFrameToVectors, processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
+import { processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
 import { movementDataSourceNames } from "./movement"
-import e from "express"
+import { detectDevice } from "./utils/device"
 
 // EPIC: BUG FIXES
 // TODO: Fix glove rotation bug
@@ -48,52 +48,32 @@ addLoadingIndicator();
     /** GUI Setup & Stats setup */
     const gui = new GUI()
     const debugObject = {
-        mode: "fromVideo",
         playbackSpeed: 1,
         motionDataScale: 5,
         movement_data: movementDataSourceNames[0],
         gloveScale: 0.0009,
         pause: false,
-        model: "light"
+        model: "light" as "light" | "full" | "heavy" | "mobile",
+        usingMobile: detectDevice()
     }
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
+    gui.add(debugObject, "usingMobile")
 
     /** Set up basic statistics */
     const stats = new Stats()
     stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom)
 
-    /** Data Source (either JSON or VIDEO, default to JSON for mobile) */
-
-    // JSON Data Configuration V1 (deprecated)
-    const retrieveExtractedJSONDataV1 = async (dataSetName: string) => {
-        const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
-        return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
-    }
-    let processedCurrentJSONDataSetV1: any = await retrieveExtractedJSONDataV1(debugObject.movement_data)
-
-    // JSON Data Configuration V2
-    const retrieveExtractedJSONDataV2 = async (dataSetName: string) => {
-        const json = await fetch(`/motion_data_v2/${dataSetName}.json`).then(res => res.json())
-        return json.map((frame: any) => {
-            const processedFrame: any = {}
-            Object.entries(frame).forEach(([key, value]: any) => {
-                processedFrame[key] = new Vector3(value.x, value.y, value.z)
-            })
-            return processedFrame
-        })
-    }
-    let processedCurrentJSONDataSetV2: any = await retrieveExtractedJSONDataV2(debugObject.movement_data)
-
     // Video Data Configuration
     let video: HTMLVideoElement = 
         await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
-    let poseDetector: poseDetection.PoseDetector = await createBlazePoseDetector("light")
+    let poseDetector: poseDetection.PoseDetector = await createMoveNetPoseDetector()
     gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
         if (video) {
             video.playbackRate = debugObject.playbackSpeed
         }
     })
+
     gui.add(debugObject, "pause").onChange((value) => {
         if (value) {
             video?.pause()
@@ -101,6 +81,7 @@ addLoadingIndicator();
             video?.play()
         }
     })
+    
     gui.add(debugObject, "model", ["light", "full", "heavy"]).onChange(async (value) => {
         video?.pause()
         poseDetector = await createBlazePoseDetector(value)
@@ -108,31 +89,9 @@ addLoadingIndicator();
     })
 
     // Conditionally reset either the JSON or Video data source
-    const resetDataSource = async (ele: string) => {
-        if (ele === "fromVideo") {
-            debugObject.pause = true
-            video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
-            poseDetector.reset()
-            debugObject.pause = false
-        } else if (ele === "fromJSON") {
-            // Start at the beginning 
-            frame = 0
-                
-            // Get the initial JSON data
-            processedCurrentJSONDataSetV1 = await retrieveExtractedJSONDataV1(debugObject.movement_data)
-                
-            // Remove the initial video source
-            removeVideo()
-        } else if (ele === "fromJSONV2") {
-            // Start at the beginning 
-            frame = 0
-                            
-            // Get the initial JSON data
-            processedCurrentJSONDataSetV2 = await retrieveExtractedJSONDataV2(debugObject.movement_data)
-                            
-            // Remove the initial video source
-            removeVideo()
-        }
+    const resetDataSource = async () => {
+        video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
+        poseDetector.reset()
     }
 
     // Allow user to change data source 
@@ -141,11 +100,8 @@ addLoadingIndicator();
         "movement_data", 
         movementDataSourceNames
     ).onChange(async () => {
-        resetDataSource(debugObject.mode)
+        resetDataSource()
     })
-
-    // Allow user to switch between video and JSON data source
-    gui.add(debugObject, "mode", ["fromVideo", "fromJSON", "fromJSONV2", "extract"]).onChange(resetDataSource)
 
     /** Setup renderer and scene */
     const canvas = document.querySelector("canvas.webgl")!
@@ -198,7 +154,7 @@ addLoadingIndicator();
 
     /** Camera & User Camera */
     const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100)
-    camera.position.set(-10, 13, 18)
+    camera.position.set(-10, 17, 18)
     scene.add(camera)
 
     const controls = new OrbitControls(camera, canvas as HTMLElement)
@@ -209,36 +165,6 @@ addLoadingIndicator();
     bobletBot.addSelfToScene(scene)
 
     /** Operating functions */
-
-    // Extract data from video
-    const dataHolder: { [key: string]: Vector3 }[] = []
-    let progress: "setup" | "extracting" | "logging" | "done" = "setup"
-    const extractDataFromVideo = async () => {
-        if (progress === "setup") {
-            debugObject.pause = true
-            poseDetector.reset()
-            video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
-            video.style.display ="none"
-            video.loop = false
-            progress = "extracting"
-            debugObject.pause = false
-        } else if (progress === "extracting") {
-            if (poseDetector && !video.paused) {
-                const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video)
-                if (vectorsAtFrame) {
-                    const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
-                    dataHolder.push(scaledVectorsAtFrame)
-                }
-            } else {
-                progress = "logging"
-            }
-        } else if (progress === "logging") {
-            console.log(JSON.stringify(dataHolder))
-            progress = "done"
-        } else if (progress === "done") {
-            return
-        }
-    }
 
     // Process from live video
     const processFromVideoMode = async () => {
@@ -261,64 +187,24 @@ addLoadingIndicator();
         controls.update()
     }
 
-    // Process from JSON
-    const processFromJSONMode = async () => {
-        /** Boblet bot from JSON */
-        const vectorsAtFrame = adjustFrameForScale(
-            processedCurrentJSONDataSetV1[frame][0], debugObject.motionDataScale)
-        bobletBot.positionSelfFromMotionData(vectorsAtFrame)
-        if (frame < processedCurrentJSONDataSetV1.length - 1) {
-            frame += 1
-        } else {
-            frame = 0
-        }
-    }
-
-    // Process from JSON upgraded
-    const processFromJSONModeV2 = async () => {
-        /** Boblet bot from JSON */
-        bobletBot.positionSelfFromMotionData(processedCurrentJSONDataSetV2[frame])
-        if (frame < processedCurrentJSONDataSetV2.length - 1) {
-            frame += 1
-        } else {
-            frame = 0
-        }
-    }
-
     /** Animate */
     const clock = new THREE.Clock()
-    let frame = 0
     const tick = async () =>
     {
         stats.begin()
-        const delta = clock.getDelta()
 
         if (!debugObject.pause) {
 
-            const fromVideo = debugObject.mode === "fromVideo"
-            const fromJSON = debugObject.mode === "fromJSON"
-            const fromJSONV2 = debugObject.mode === "fromJSONV2"
+            processFromVideoMode()
 
-            if (fromVideo || fromJSON || fromJSONV2) {
-                if (fromVideo) {
-                    processFromVideoMode()
-                } else if (fromJSON) {
-                    processFromJSONMode()
-                } else {
-                    processFromJSONModeV2()
-                }
+            // Move the light
+            const elapsedTime = clock.getElapsedTime()
+            light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
+            light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
+            light.spotLight.lookAt(new Vector3(0,0,0))
 
-                // Move the light
-                const elapsedTime = clock.getElapsedTime()
-                light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
-                light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
-                light.spotLight.lookAt(new Vector3(0,0,0))
-
-                // Render 
-                renderer.render(scene, camera)
-            } else {
-                extractDataFromVideo()
-            }
+            // Render 
+            renderer.render(scene, camera)
         }
  
         stats.end()
@@ -328,3 +214,112 @@ addLoadingIndicator();
     removeLoadingIndicator()
     tick()
 })()
+
+
+// Reset data source selection code
+// else if (ele === "fromJSON") {
+//     // Start at the beginning 
+//     frame = 0
+        
+//     // Get the initial JSON data
+//     processedCurrentJSONDataSetV1 = await retrieveExtractedJSONDataV1(debugObject.movement_data)
+        
+//     // Remove the initial video source
+//     removeVideo()
+// } else if (ele === "fromJSONV2") {
+//     // Start at the beginning 
+//     frame = 0
+                    
+//     // Get the initial JSON data
+//     processedCurrentJSONDataSetV2 = await retrieveExtractedJSONDataV2(debugObject.movement_data)
+                    
+//     // Remove the initial video source
+//     removeVideo()
+// }
+
+// JSON data retrieval
+
+// JSON Data Configuration V1 (deprecated)
+// const retrieveExtractedJSONDataV1 = async (dataSetName: string) => {
+//     const json = await fetch(`/motion_data/${dataSetName}.json`).then(res => res.json())
+//     return json.map((frame: any) => processJSONFrameToVectors(frame, debugObject))
+// }
+// let processedCurrentJSONDataSetV1: any = await retrieveExtractedJSONDataV1(debugObject.movement_data)
+
+// // JSON Data Configuration V2
+// const retrieveExtractedJSONDataV2 = async (dataSetName: string) => {
+//     const json = await fetch(`/motion_data_v2/${dataSetName}.json`).then(res => res.json())
+//     return json.map((frame: any) => {
+//         const processedFrame: any = {}
+//         Object.entries(frame).forEach(([key, value]: any) => {
+//             processedFrame[key] = new Vector3(value.x, value.y, value.z)
+//         })
+//         return processedFrame
+//     })
+// }
+// let processedCurrentJSONDataSetV2: any = await retrieveExtractedJSONDataV2(debugObject.movement_data)
+
+// JSON data processing
+// // Process from JSON
+// const processFromJSONMode = async () => {
+//     /** Boblet bot from JSON */
+//     const vectorsAtFrame = adjustFrameForScale(
+//         processedCurrentJSONDataSetV1[frame][0], debugObject.motionDataScale)
+//     bobletBot.positionSelfFromMotionData(vectorsAtFrame)
+//     if (frame < processedCurrentJSONDataSetV1.length - 1) {
+//         frame += 1
+//     } else {
+//         frame = 0
+//     }
+// }
+
+// // Process from JSON upgraded
+// const adjustForFPS = 3
+// let adjustCounter = 1
+// const processFromJSONModeV2 = async () => {
+
+//     /** Boblet bot from JSON V2 */
+//     const lerpSlerp = adjustCounter / adjustForFPS
+//     bobletBot.positionSelfFromMotionData(processedCurrentJSONDataSetV2[frame], lerpSlerp, lerpSlerp)
+//     if (frame < processedCurrentJSONDataSetV2.length - 1) {
+//         frame += 1
+//     } else {
+//         frame = 0
+//     }
+
+//     if (adjustCounter < adjustForFPS) {
+//         adjustCounter++
+//     } else {
+//         adjustCounter = 0
+//     }
+// }
+
+// Extract data from video
+// const dataHolder: { [key: string]: Vector3 }[] = []
+// let progress: "setup" | "extracting" | "logging" | "done" = "setup"
+// const extractDataFromVideo = async () => {
+//     if (progress === "setup") {
+//         debugObject.pause = true
+//         poseDetector.reset()
+//         video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
+//         video.style.display ="none"
+//         video.loop = false
+//         progress = "extracting"
+//         debugObject.pause = false
+//     } else if (progress === "extracting") {
+//         if (poseDetector && !video.paused) {
+//             const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video)
+//             if (vectorsAtFrame) {
+//                 const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
+//                 dataHolder.push(scaledVectorsAtFrame)
+//             }
+//         } else {
+//             progress = "logging"
+//         }
+//     } else if (progress === "logging") {
+//         console.log(JSON.stringify(dataHolder))
+//         progress = "done"
+//     } else if (progress === "done") {
+//         return
+//     }
+// }
