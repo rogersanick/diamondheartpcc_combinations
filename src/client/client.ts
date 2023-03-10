@@ -178,7 +178,7 @@ addLoadingIndicator();
     const processFromVideoMode = async () => {
         
         /** Boblet bot from video stream */
-        if (video && blazePoseDetector) {
+        if (video && !video.paused && blazePoseDetector) {
             const poseData = await blazePoseDetector?.estimatePoses(video, { flipHorizontal: true })
             const vectorsAtFrame = await processBlazePoseFrameToVectors(poseData)
             if (vectorsAtFrame) {
