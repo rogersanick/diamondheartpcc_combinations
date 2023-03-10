@@ -72,17 +72,17 @@ const createBlazePoseDetector = async (modelType: "lite" | "full" | "heavy", isM
 }
 
 const movementDataSourceNames = [
-    "fight_stance", 
-    "combo_1", 
-    "combo_2",
-    "combo_3",
-    "combo_4",
-    "combo_5",
-    "combo_6",
-    "combo_7",
-    "combo_8",
-    "combo_9",
-    "combo_10"
+    "pcc_fight_stance", 
+    "pcc_combo_1", 
+    "pcc_combo_2",
+    "pcc_combo_3",
+    "pcc_combo_4",
+    "pcc_combo_5",
+    "pcc_combo_6",
+    "pcc_combo_7",
+    "pcc_combo_8",
+    "pcc_combo_9",
+    "pcc_combo_10"
 ] 
 
 export { movementDataSourceNames, setupVideo, removeVideo, 
