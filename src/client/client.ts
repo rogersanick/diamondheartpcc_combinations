@@ -102,8 +102,9 @@ addLoadingIndicator();
     // Conditionally reset either the JSON or Video data source
     const resetDataSource = async () => {
         video?.pause()
+        blazePoseDetector?.dispose()
+        blazePoseDetector = await createBlazePoseDetector(debugObject.model, isMobileClient)
         video = await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed)
-        blazePoseDetector.reset()
     }
 
     // Allow user to change data source 
