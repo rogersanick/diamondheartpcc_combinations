@@ -1,6 +1,5 @@
 import { Vector3 } from "three"
 import * as poseDetection from "@tensorflow-models/pose-detection"
-import { createBlazePoseDetector } from "../movement"
 
 /** Process JSON frame data to Vectors */
 const processJSONFrameToVectors = (data: any[], debugObject: any) => {
@@ -20,25 +19,19 @@ const processJSONFrameToVectors = (data: any[], debugObject: any) => {
 }
 
 /** Process video frame to Vectors */
-const processBlazePoseFrameToVectors = (poseDetector: poseDetection.PoseDetector, 
-    video: HTMLVideoElement) => {
-    return poseDetector?.estimatePoses(
-        video, {
-            flipHorizontal: true,
-        }).then(results => {
-        const pose = results[0]
-        if (!pose || !pose.keypoints3D) { return }
-        const points: {[key: string]: Vector3} = pose.keypoints3D.reduce((acc, point) => {
+const processBlazePoseFrameToVectors = (results: poseDetection.Pose[]) => {
+    const pose = results[0]
+    if (!pose || !pose.keypoints3D) { return }
+    const points: {[key: string]: Vector3} = pose.keypoints3D.reduce((acc, point) => {
 
-            // Build the map
-            const { x, y, z } = point
-            acc[point.name!] = new Vector3(x, y, z)
+        // Build the map
+        const { x, y, z } = point
+        acc[point.name!] = new Vector3(x, y, z)
 
-            return acc
-        }, {} as {[key: string]: Vector3})
+        return acc
+    }, {} as {[key: string]: Vector3})
 
-        return points
-    })
+    return points
 }
 
 const processMovenetFrameToVectors = (poseDetector: poseDetection.PoseDetector,

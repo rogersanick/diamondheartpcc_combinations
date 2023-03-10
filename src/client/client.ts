@@ -15,6 +15,7 @@ import { processBlazePoseFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
 import { movementDataSourceNames } from "./movement"
 import { detectDevice } from "./utils/device"
+import { createComboGui } from "./comboGui"
 
 // EPIC: BUG FIXES
 // TODO: Fix glove rotation bug
@@ -57,11 +58,21 @@ addLoadingIndicator();
         model: "lite" as "lite" | "full" | "heavy",
     }
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
+    gui.close()
 
     /** Set up basic statistics */
-    const stats = new Stats()
-    stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(stats.dom)
+    // const stats = new Stats()
+    // stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+    // document.body.appendChild(stats.dom)
+
+    // Set up combo input
+    createComboGui(movementDataSourceNames, async (ele: Event) => {
+        if (movementDataSourceNames.includes((ele.target as HTMLSelectElement).value)) {
+            debugObject.movement_data = (ele.target as HTMLSelectElement).value
+            gui.updateDisplay()
+            resetDataSource()
+        }
+    })
 
     // Video Data Configuration
     let video: HTMLVideoElement = 
@@ -88,8 +99,6 @@ addLoadingIndicator();
         video?.play()
     })
     
-
-
     // Conditionally reset either the JSON or Video data source
     const resetDataSource = async () => {
         video = await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed)
@@ -108,9 +117,9 @@ addLoadingIndicator();
     /** Setup renderer and scene */
     const canvas = document.querySelector("canvas.webgl")!
     const renderer = new WebGLRenderer({ canvas, antialias: true })
-    renderer.physicallyCorrectLights = true
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.physicallyCorrectLights = true
 
     // Scene
     const scene = new THREE.Scene()
@@ -121,7 +130,7 @@ addLoadingIndicator();
     const gltfLoader = new GLTFLoader()
     const textureLoader = new THREE.TextureLoader()
  
-    const light = addLights(scene)
+    addLights(scene)
     const floor = generatePlane()
     textureLoader.load("/logo/dh_logo.png", (texture) => {
         floor.material.map = texture
@@ -164,17 +173,13 @@ addLoadingIndicator();
     const bobletBot = new BobletBot(gltfLoader, debugObject)
     bobletBot.addSelfToScene(scene)
 
-    /** Operating functions */
-
     // Process from live video
     const processFromVideoMode = async () => {
-        // Time variables
-        const delta = clock.getDelta()
-        
         
         /** Boblet bot from video stream */
         if (video && blazePoseDetector) {
-            const vectorsAtFrame = await processBlazePoseFrameToVectors(blazePoseDetector, video)
+            const poseData = await blazePoseDetector?.estimatePoses(video, { flipHorizontal: true })
+            const vectorsAtFrame = await processBlazePoseFrameToVectors(poseData)
             if (vectorsAtFrame) {
                 const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame)
@@ -186,10 +191,9 @@ addLoadingIndicator();
     }
 
     /** Animate */
-    const clock = new THREE.Clock()
     const tick = async () =>
     {
-        stats.begin()
+        // stats.begin()
 
         if (!debugObject.pause) {
 
@@ -199,7 +203,7 @@ addLoadingIndicator();
             renderer.render(scene, camera)
         }
  
-        stats.end()
+        // stats.end()
         requestAnimationFrame(tick)
     }
  

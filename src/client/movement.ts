@@ -1,7 +1,6 @@
 import * as poseDetection from "@tensorflow-models/pose-detection"
-import * as handPoseDetection from "@tensorflow-models/hand-pose-detection"
-import * as mpHands from "@mediapipe/hands"
 import * as mpPose from "@mediapipe/pose"
+
 
 // Creates a video element and gets the users webcam video input
 let video: HTMLVideoElement = document.createElement("video")
@@ -14,9 +13,8 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     }
     video = document.createElement("video")
     video.id = "boblet_bot_input"
-    video.id = "boblet_bot_input"
     video.style.maxWidth = "40vw"
-    video.style.maxHeight = "500px"
+    video.style.maxHeight = "400px"
     video.style.margin = "auto"
     video.style.display = "flex"
     video.style.position = "absolute"
@@ -47,23 +45,24 @@ const removeVideo = () => {
     video.remove()
 }
 
-const createHandPoseDetector = async () => {
-    const model = handPoseDetection.SupportedModels.MediaPipeHands
-    return await handPoseDetection.createDetector(model, {
-        runtime: "mediapipe",
-        modelType: "full",
-        solutionPath: `https://cdn.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}`
-    })
-}
+// const createHandPoseDetector = async () => {
+//     const model = handPoseDetection.SupportedModels.MediaPipeHands
+//     return await handPoseDetection.createDetector(model, {
+//         runtime: "mediapipe",
+//         modelType: "full",
+//         solutionPath: `https://cdn.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}`
+//     })
+// }
 
 const createBlazePoseDetector = async (modelType: "lite" | "full" | "heavy", isMobileClient: boolean) => {
-    // Create a pose detector w/ tfjs instead of mediapipe
     return await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
+        maxPoses: 1,
+        scoreThreshold: 0.65,
         enableSmoothing: true,
         runtime: "mediapipe",
         modelType: modelType,
         solutionPath: `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${mpPose.VERSION}`
-    })
+    } as poseDetection.BlazePoseMediaPipeModelConfig)
 }
 
 const movementDataSourceNames = [
@@ -80,5 +79,4 @@ const movementDataSourceNames = [
     "pcc_combo_10"
 ] 
 
-export { movementDataSourceNames, setupVideo, removeVideo, 
-    createHandPoseDetector, createBlazePoseDetector }
+export { movementDataSourceNames, setupVideo, removeVideo, createBlazePoseDetector }

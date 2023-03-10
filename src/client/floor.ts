@@ -10,6 +10,7 @@ const generatePlane = () => {
             color: 0x808080,
         })
     )
+    floor.receiveShadow = true
     floor.rotation.x = - Math.PI * 0.5
     return floor
 }
