@@ -7,11 +7,11 @@ const createComboGui = (options: string[], callback: (e: Event) => void) => {
 
     const defaultOption = document.createElement("option")
     defaultOption.value = ""
-    defaultOption.text = "Select a number"
+    defaultOption.text = "Select a Combination"
     select.appendChild(defaultOption)
     select.onchange = callback
 
-    for (let i = 1; i <= options.length; i++) {
+    for (let i = 0; i < options.length; i++) {
         const option = document.createElement("option")
         option.value = options[i]
         option.text = options[i]
@@ -27,7 +27,7 @@ const createComboGui = (options: string[], callback: (e: Event) => void) => {
       bottom: 30px;
       left: 30px;
       max-width: 40vw;
-      font-size: 18px;
+      font-size: 2rem;
       padding: 10px 20px;
       border-radius: 5px;
       border: none;
