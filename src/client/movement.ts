@@ -2,7 +2,6 @@ import * as poseDetection from "@tensorflow-models/pose-detection"
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection"
 import * as mpHands from "@mediapipe/hands"
 import * as mpPose from "@mediapipe/pose"
-import "@tensorflow/tfjs-backend-webgl"
 
 // Creates a video element and gets the users webcam video input
 let video: HTMLVideoElement = document.createElement("video")
@@ -59,11 +58,7 @@ const createHandPoseDetector = async () => {
 
 const createBlazePoseDetector = async (modelType: "lite" | "full" | "heavy", isMobileClient: boolean) => {
     // Create a pose detector w/ tfjs instead of mediapipe
-    return isMobileClient ? await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
-        enableSmoothing: true,
-        runtime: "tfjs",
-        modelType: modelType,
-    }): await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
+    return await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
         enableSmoothing: true,
         runtime: "mediapipe",
         modelType: modelType,
