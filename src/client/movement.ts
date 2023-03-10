@@ -59,7 +59,11 @@ const createHandPoseDetector = async () => {
 
 const createBlazePoseDetector = async (modelType: "lite" | "full" | "heavy", isMobileClient: boolean) => {
     // Create a pose detector w/ tfjs instead of mediapipe
-    return await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
+    return isMobileClient ? await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
+        enableSmoothing: true,
+        runtime: "tfjs",
+        modelType: modelType,
+    }): await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
         enableSmoothing: true,
         runtime: "mediapipe",
         modelType: modelType,
