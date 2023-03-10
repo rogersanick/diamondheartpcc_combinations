@@ -26,8 +26,8 @@ class BobletBot {
     // Joints
     leftFoot: Mesh
     rightFoot: Mesh
-    leftShoulder: Mesh
-    rightShoulder: Mesh
+    // leftShoulder: Mesh
+    // rightShoulder: Mesh
     rightHand: Mesh
     leftHand: Mesh
 
@@ -52,9 +52,9 @@ class BobletBot {
 
         // Make the torso
         this.head = new Mesh(new SphereGeometry(0.5, 16, 16), this.bodyWhiteMaterial)
-        this.upperTorso = this.generateLimb (0.15, true, 0.4)
-        this.middleTorso = this.generateLimb (0.2, false, 0.35)
-        this.lowerTorso = this.generateLimb(0.1, true, 0.35)
+        this.upperTorso = this.generateLimb (0.15, true, 0.35)
+        this.middleTorso = this.generateLimb (0.2, false, 0.3)
+        this.lowerTorso = this.generateLimb(0.1, true, 0.25)
 
         this.leftFoot = this.generateLimb(0.13)
         this.rightFoot = this.generateLimb(0.13)
@@ -63,8 +63,8 @@ class BobletBot {
         const generateJoint = (radius: number, material: MeshToonMaterial = this.bodyBlueMaterial) => { 
             return new Mesh(new SphereGeometry(radius, 32, 32), material)
         }
-        this.leftShoulder = generateJoint(0.25)
-        this.rightShoulder = generateJoint(0.25)
+        // this.leftShoulder = generateJoint(0.25)
+        // this.rightShoulder = generateJoint(0.25)
         // this.leftElbow = generateJoint(0.15, this.bodyBlueMaterial)
         // this.rightElbow = generateJoint(0.15, this.bodyBlueMaterial)
         // this.leftHip = generateJoint(0.2)
@@ -107,7 +107,7 @@ class BobletBot {
             this.leftThigh, this.rightThigh, this.leftArm, this.rightArm, 
             this.leftForearm, this.rightForearm, this.head, this.upperTorso, 
             this.middleTorso, this.lowerTorso, this.leftFoot, this.rightFoot, 
-            this.leftShoulder, this.rightShoulder, this.rightHand, this.leftHand
+            this.rightHand, this.leftHand
         )
     }
 
@@ -130,8 +130,8 @@ class BobletBot {
         placeLimb(points["right_heel"], points["right_foot_index"], this.rightFoot)
       
         // Place all of the joints
-        placeJoint(points["left_shoulder"], this.leftShoulder)
-        placeJoint(points["right_shoulder"], this.rightShoulder)
+        // placeJoint(points["left_shoulder"], this.leftShoulder)
+        // placeJoint(points["right_shoulder"], this.rightShoulder)
         // placeJoint(points["left_elbow"], this.leftElbow)
         // placeJoint(points["right_elbow"], this.rightElbow)
         // placeJoint(points["left_hip"], this.leftHip)
