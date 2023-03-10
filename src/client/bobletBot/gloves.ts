@@ -1,5 +1,4 @@
-import { GUI } from "dat.gui"
-import { Group, Mesh, Object3D, Scene, Vector3 } from "three"
+import { Group, Mesh, Object3D, Vector3 } from "three"
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { setPositionFromVector, setRotationFromVectors } from "../utils/vectorUtils"
 

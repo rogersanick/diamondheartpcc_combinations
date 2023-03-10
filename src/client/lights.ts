@@ -1,4 +1,4 @@
-import { AmbientLight, DirectionalLight, PointLight, Scene, SpotLight, SpotLightHelper } from "three"
+import { AmbientLight, Scene } from "three"
 
 /**
   * Lights
