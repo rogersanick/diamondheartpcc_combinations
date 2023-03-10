@@ -3,8 +3,8 @@ import { AmbientLight, Scene, SpotLight, SpotLightHelper } from "three"
 /**
   * Lights
   */
-const addLights = (scene: Scene) => {
-    const ambientLight = new AmbientLight(0xffffff, 3)
+const addLights = (scene: Scene, isMobileClient: boolean) => {
+    const ambientLight = new AmbientLight(0xffffff, 5)
     scene.add(ambientLight)
   
     const spotLight = new SpotLight(0xffffff, 50, 30, Math.PI * 0.2, 0.25, 1)
@@ -14,12 +14,14 @@ const addLights = (scene: Scene) => {
     spotLight.shadow.mapSize.height = 1024
     spotLight.shadow.camera.near = 1
     spotLight.shadow.camera.far = 100
-    scene.add(spotLight)
-    const helper = new SpotLightHelper(spotLight)
-    // scene.add(helper)
+    if (!isMobileClient) {
+        scene.add(spotLight)
+        ambientLight.intensity = 3
+    }
+    
+
     return {
         spotLight,
-        helper,
     }
 }
 

@@ -76,7 +76,7 @@ addLoadingIndicator();
 
     // Video Data Configuration
     let video: HTMLVideoElement = 
-        await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed)
+        await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed, isMobileClient)
     let blazePoseDetector: poseDetection.PoseDetector = await createBlazePoseDetector(debugObject.model, isMobileClient)
     gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
         if (video) {
@@ -104,7 +104,7 @@ addLoadingIndicator();
         video?.pause()
         blazePoseDetector?.dispose()
         blazePoseDetector = await createBlazePoseDetector(debugObject.model, isMobileClient)
-        video = await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed)
+        video = await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed, isMobileClient)
     }
 
     // Allow user to change data source 
@@ -132,8 +132,8 @@ addLoadingIndicator();
     const gltfLoader = new GLTFLoader()
     const textureLoader = new THREE.TextureLoader()
  
-    addLights(scene)
-    const floor = generatePlane()
+    addLights(scene, isMobileClient)
+    const floor = generatePlane(isMobileClient)
     textureLoader.load("/logo/dh_logo.png", (texture) => {
         floor.material.map = texture
         floor.material.needsUpdate = true

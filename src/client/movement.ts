@@ -4,7 +4,7 @@ import * as mpPose from "@mediapipe/pose"
 
 // Creates a video element and gets the users webcam video input
 let video: HTMLVideoElement = document.createElement("video")
-const setupVideo = async (fileName: string, playbackSpeed = 1) => {
+const setupVideo = async (fileName: string, playbackSpeed = 1, isMobileClient: boolean) => {
     if (video) {
         video.style.opacity = "0"
         // Wait for fade out
@@ -24,6 +24,7 @@ const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     video.style.borderRadius = "30px"
     video.style.opacity = "100"
     video.style.transition = "opacity 0.2s ease-in-out"
+    
     document.body.append(video)
     video.muted = true
     video.playsInline = true
