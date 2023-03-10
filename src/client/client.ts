@@ -109,8 +109,6 @@ addLoadingIndicator();
     const canvas = document.querySelector("canvas.webgl")!
     const renderer = new WebGLRenderer({ canvas, antialias: true })
     renderer.physicallyCorrectLights = true
-    renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
@@ -183,9 +181,6 @@ addLoadingIndicator();
             }
         }
     
-        // Rotate floor
-        floor.rotateZ(delta * 0.05)
-    
         // Update controls
         controls.update()
     }
@@ -199,12 +194,6 @@ addLoadingIndicator();
         if (!debugObject.pause) {
 
             processFromVideoMode()
-
-            // Move the light
-            const elapsedTime = clock.getElapsedTime()
-            light.spotLight.position.x = Math.cos(elapsedTime / 2) * 15
-            light.spotLight.position.z = Math.sin(elapsedTime / 2) * 15
-            light.spotLight.lookAt(new Vector3(0,0,0))
 
             // Render 
             renderer.render(scene, camera)
