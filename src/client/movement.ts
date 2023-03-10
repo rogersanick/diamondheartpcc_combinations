@@ -8,16 +8,25 @@ import "@tensorflow/tfjs-backend-webgl"
 let video: HTMLVideoElement = document.createElement("video")
 const setupVideo = async (fileName: string, playbackSpeed = 1) => {
     if (video) {
+        video.style.opacity = "0"
+        // Wait for fade out
+        await new Promise((resolve) => setTimeout(resolve, 200))
         document.getElementById("boblet_bot_input")?.remove()
     }
     video = document.createElement("video")
     video.id = "boblet_bot_input"
-    video.style.maxHeight = "50vh"
-    video.style.margin = "-50px"
+    video.id = "boblet_bot_input"
+    video.style.maxWidth = "40vw"
+    video.style.maxHeight = "500px"
+    video.style.margin = "auto"
     video.style.display = "flex"
-    video.style.bottom = "0"
-    video.style.right = "0"
     video.style.position = "absolute"
+    video.style.border = "solid white 5px"
+    video.style.bottom = "30px"
+    video.style.right = "30px"
+    video.style.borderRadius = "30px"
+    video.style.opacity = "100"
+    video.style.transition = "opacity 0.2s ease-in-out"
     document.body.append(video)
     video.muted = true
     video.playsInline = true
@@ -48,19 +57,12 @@ const createHandPoseDetector = async () => {
     })
 }
 
-const createBlazePoseDetector = async (modelType: "light" | "full" | "heavy") => {
+const createBlazePoseDetector = async (modelType: "lite" | "full" | "heavy", isMobileClient: boolean) => {
+    // Create a pose detector w/ tfjs instead of mediapipe
     return await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
         enableSmoothing: true,
-        runtime: "mediapipe", // or 'tfjs'
-        modelType: modelType,
-        solutionPath: `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${mpPose.VERSION}`
-    })
-}
-
-const createMoveNetPoseDetector = async () => {
-    return await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, {
         runtime: "mediapipe",
-        modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER,
+        modelType: modelType,
         solutionPath: `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${mpPose.VERSION}`
     })
 }
@@ -90,4 +92,4 @@ const movementDataSourceNames = [
 ] 
 
 export { movementDataSourceNames, setupVideo, removeVideo, 
-    createHandPoseDetector, createBlazePoseDetector, createMoveNetPoseDetector }
+    createHandPoseDetector, createBlazePoseDetector }

@@ -20,7 +20,7 @@ const processJSONFrameToVectors = (data: any[], debugObject: any) => {
 }
 
 /** Process video frame to Vectors */
-const processVideoFrameToVectors = (poseDetector: poseDetection.PoseDetector, 
+const processBlazePoseFrameToVectors = (poseDetector: poseDetection.PoseDetector, 
     video: HTMLVideoElement) => {
     return poseDetector?.estimatePoses(
         video, {
@@ -41,17 +41,40 @@ const processVideoFrameToVectors = (poseDetector: poseDetection.PoseDetector,
     })
 }
 
-/** A utility which extracts movement data from the provided video input */
-const processVideoMovementData = async (video: HTMLVideoElement) => {
-    const poseDetector = await createBlazePoseDetector("heavy")
-    const results: any[] = []
-    video.loop = false
-    while(!video.paused) {
-        poseDetector.estimatePoses(video).then(poses => {
-            results.push(poses)
-        })
-    }
-    console.log(JSON.stringify(results))
+const processMovenetFrameToVectors = (poseDetector: poseDetection.PoseDetector,
+    video: HTMLVideoElement) => {
+    return poseDetector?.estimatePoses(
+        video, {
+            flipHorizontal: true,
+        }).then(results => {
+        console.log(results)
+        const pose = results[0]
+        if (!pose || !pose.keypoints3D) { return }
+        console.log(pose)
+        const points: {[key: string]: Vector3} = pose.keypoints3D.reduce((acc, point) => {
+    
+            // Build the map
+            const { x, y, z } = point
+            acc[point.name!] = new Vector3(x, y, z)
+    
+            return acc
+        }, {} as {[key: string]: Vector3})
+    
+        return points
+    })
 }
 
-export { processJSONFrameToVectors, processVideoFrameToVectors }
+/** A utility which extracts movement data from the provided video input */
+// const processVideoMovementData = async (video: HTMLVideoElement) => {
+//     const poseDetector = await createBlazePoseDetector("heavy")
+//     const results: any[] = []
+//     video.loop = false
+//     while(!video.paused) {
+//         poseDetector.estimatePoses(video).then(poses => {
+//             results.push(poses)
+//         })
+//     }
+//     console.log(JSON.stringify(results))
+// }
+
+export { processJSONFrameToVectors, processBlazePoseFrameToVectors, processMovenetFrameToVectors }

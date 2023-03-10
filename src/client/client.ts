@@ -6,12 +6,12 @@ import * as poseDetection from "@tensorflow-models/pose-detection"
 import Stats from "stats.js"
 import { Vector3, WebGLRenderer } from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import { createBlazePoseDetector, createMoveNetPoseDetector, setupVideo } from "./movement"
+import { createBlazePoseDetector, setupVideo } from "./movement"
 import { addLights } from "./lights"
 import { generatePlane} from "./floor"
 import BobletBot from "./bobletBot/bobletBotModel"
 import { addLoadingIndicator, removeLoadingIndicator } from "./loader"
-import { processVideoFrameToVectors } from "./utils/vectorProcessingUtils"
+import { processBlazePoseFrameToVectors } from "./utils/vectorProcessingUtils"
 import { adjustFrameForScale } from "./utils/vectorUtils"
 import { movementDataSourceNames } from "./movement"
 import { detectDevice } from "./utils/device"
@@ -47,17 +47,16 @@ addLoadingIndicator();
     
     /** GUI Setup & Stats setup */
     const gui = new GUI()
+    const isMobileClient = detectDevice()
     const debugObject = {
         playbackSpeed: 1,
         motionDataScale: 5,
         movement_data: movementDataSourceNames[0],
         gloveScale: 0.0009,
         pause: false,
-        model: "light" as "light" | "full" | "heavy" | "mobile",
-        usingMobile: detectDevice()
+        model: "lite" as "lite" | "full" | "heavy",
     }
     gui.add(debugObject, "motionDataScale", 0, 10, 0.01)
-    gui.add(debugObject, "usingMobile")
 
     /** Set up basic statistics */
     const stats = new Stats()
@@ -66,8 +65,8 @@ addLoadingIndicator();
 
     // Video Data Configuration
     let video: HTMLVideoElement = 
-        await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
-    let poseDetector: poseDetection.PoseDetector = await createMoveNetPoseDetector()
+        await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed)
+    let blazePoseDetector: poseDetection.PoseDetector = await createBlazePoseDetector(debugObject.model, isMobileClient)
     gui.add(debugObject, "playbackSpeed", 0, 2, 0.01).onChange(() => {
         if (video) {
             video.playbackRate = debugObject.playbackSpeed
@@ -81,17 +80,20 @@ addLoadingIndicator();
             video?.play()
         }
     })
-    
-    gui.add(debugObject, "model", ["light", "full", "heavy"]).onChange(async (value) => {
+
+    gui.add(debugObject, "model", ["lite", "full", "heavy"]).onChange(async (value) => {
         video?.pause()
-        poseDetector = await createBlazePoseDetector(value)
+        blazePoseDetector?.dispose()
+        blazePoseDetector = await createBlazePoseDetector(value, isMobileClient)
         video?.play()
     })
+    
+
 
     // Conditionally reset either the JSON or Video data source
     const resetDataSource = async () => {
-        video = await setupVideo(`/videos/${debugObject.movement_data}.MOV`, debugObject.playbackSpeed)
-        poseDetector.reset()
+        video = await setupVideo(`/videos/${debugObject.movement_data}.mov`, debugObject.playbackSpeed)
+        blazePoseDetector.reset()
     }
 
     // Allow user to change data source 
@@ -171,9 +173,10 @@ addLoadingIndicator();
         // Time variables
         const delta = clock.getDelta()
         
+        
         /** Boblet bot from video stream */
-        if (video && poseDetector) {
-            const vectorsAtFrame = await processVideoFrameToVectors(poseDetector, video)
+        if (video && blazePoseDetector) {
+            const vectorsAtFrame = await processBlazePoseFrameToVectors(blazePoseDetector, video)
             if (vectorsAtFrame) {
                 const scaledVectorsAtFrame = adjustFrameForScale(vectorsAtFrame, debugObject.motionDataScale)
                 bobletBot.positionSelfFromMotionData(scaledVectorsAtFrame)
