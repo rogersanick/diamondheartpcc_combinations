@@ -73,26 +73,16 @@ const createBlazePoseDetector = async (modelType: "lite" | "full" | "heavy", isM
 
 const movementDataSourceNames = [
     "fight_stance", 
-    "combo_1_v2", 
-    "combo_2_v2", 
-    "combo_3_v2",
-    "combo_4_v2",
-    "combo_5_v2",
-    "combo_6_v2",
-    "combo_7_v2",
-    "combo_8_v2",
-    "combo_9_v2",
-    "combo_10_v2",
-    "combo_1_v1", 
-    "combo_2_v1",
-    "combo_3_v1",
-    "combo_4_v1",
-    "combo_5_v1",
-    "combo_6_v1",
-    "combo_7_v1",
-    "combo_8_v1",
-    "combo_9_v1",
-    "combo_10_v1"
+    "combo_1", 
+    "combo_2",
+    "combo_3",
+    "combo_4",
+    "combo_5",
+    "combo_6",
+    "combo_7",
+    "combo_8",
+    "combo_9",
+    "combo_10"
 ] 
 
 export { movementDataSourceNames, setupVideo, removeVideo, 
